@@ -1,0 +1,9 @@
+=======
+Hour 1
+=======
+
+Got game loop, fps counter working.
+Found lots of computer crashing bugs in Chrome/Safari.
+Mouse stopped working :(.
+
+
