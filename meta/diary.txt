@@ -59,3 +59,9 @@ Hour 16
 
 Food break.
 Did some person fixes, made doors open/close.
+
+=======
+Hour 17
+=======
+
+More bug fixes. Added first gameplay element (must open doors for people).

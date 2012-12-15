@@ -16,7 +16,9 @@ function GameCore(canvas, gameContent) {
 	this.mouse = {
 		x : 0,
 		y : 0,
-		is_down: false
+		is_down: function is_down() {
+			return (typeof this['down'] != 'undefined');
+		}
 	};
 	this.keyboard = {
 		is_key_down : function is_key_down(keyCode) {
@@ -69,13 +71,17 @@ function GameCore(canvas, gameContent) {
 		canvas.onmousedown = function(e) {
 		    self.mouse.x = e.layerX;
 		    self.mouse.y = e.layerY;
-			self.mouse.is_down = true;
+			if (typeof self.mouse['down'] == 'undefined') {
+				self.mouse['down'] = true;
+			}
 			e.cancelBubble = true;
 		};
 		canvas.onmouseup = function(e) {
 		    self.mouse.x = e.layerX;
 		    self.mouse.y = e.layerY;
-			self.mouse.is_down = false;
+			if (typeof self.mouse['down'] != 'undefined') {
+				delete self.mouse['down'];
+			}
 			e.cancelBubble = true;
 		};
 		// keyboard workaround: capture document instead of canvas

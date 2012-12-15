@@ -11,12 +11,35 @@ function LD25Person(x, y) {
 	this.offset_y = 0;
 	this.move_x = 0;
 	this.move_y = 0;
+	this.is_at = function is_at(x, y) {
+		if (this.x == x && this.y == y) return true;
+		if ((Math.abs(this.offset_x) > 0) || (Math.abs(this.offset_y) > 0)) {
+			return ((this.x + this.move_x) == x && (this.y + this.move_y) == y);
+		}
+		return false;
+	};
 	this.speed = 0.5;
-	this.waiting = false;
+	this.waiting = {
+		duration : 0,
+		on_success : null,
+		on_failure : null,
+		condition : null
+	};
+	this.waiting_task = null;
 	this.logic = function logic(engine, elapsed, level) {
-		if (this.waiting) {
-			if (level.is_door_open(level.layout[this.y + this.move_y][this.x + this.move_x])) {
-				this.waiting = false;
+		if (this.waiting.duration > 0) {
+			if (this.waiting.condition(level)) {
+				this.waiting.duration = 0;
+				if (this.waiting.on_success) {
+					this.waiting.on_success(level);
+				}
+			}
+			this.waiting.duration -= elapsed;
+			if (this.waiting <= 0) {
+				this.waiting.duration = 0;
+				if (this.waiting.on_failure) {
+					this.waiting.on_failure(level);
+				}
 			}
 		}
 		else {
@@ -35,11 +58,17 @@ function LD25Person(x, y) {
 			if (this.offset_x == 0 && this.offset_y == 0) {
 				var dx = this.move_x;
 				var dy = this.move_y;
-			
+				
 				var x = this.x + dx;
 				var y = this.y + dy;
+				
+				if (level.is_valid_coordinates(this.y + (-1 * this.move_y), this.x + (-1 * this.move_x)) &&
+				    level.is_door_open(level.layout[this.y + (-1 * this.move_y)][this.x + (-1 * this.move_x)]))
+				{
+					level.close_door(this.x + (-1 * this.move_x), this.y + (-1 * this.move_y));
+				}
 			
-				while ((dx == 0 && dy == 0) || (x < 0 && y < 0 && x >= level.w && y >= level.h) || level.is_wall(level.layout[y][x])) {
+				while ((dx == 0 && dy == 0) || !level.is_valid_coordinates(x, y) || level.is_wall(level.layout[y][x])) {
 					var direction = Math.floor((Math.random() * 4));
 					dx = 0;
 					dy = 0;
@@ -62,12 +91,23 @@ function LD25Person(x, y) {
 				}
 				
 				if (level.is_door_closed(level.layout[y][x])) {
-					level.open_door(x, y);
-					this.waiting = true;
+					var self = this;
+					this.waiting.duration = 100000;
+					this.waiting.condition = function is_door_open(level) {
+						return level.is_door_open(level.layout[y][x]);
+					};
+					this.waiting.on_success = function on_success(level) {
+						self.move_x = dx;
+						self.move_y = dy;
+					};
+					this.waiting.on_failure = function on_failure(level) {
+						// TODO
+					};
 				}
-			
-				this.move_x = dx;
-				this.move_y = dy;
+				else {
+					this.move_x = dx;
+					this.move_y = dy;
+				}
 			}
 		}
 	};

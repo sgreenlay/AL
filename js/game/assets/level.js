@@ -19,9 +19,9 @@ function LD25Level() {
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 3, 2, 2, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 3, 2, 2, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -44,6 +44,9 @@ function LD25Level() {
 	this.generate_sprite_string = function (l, u, r, d) {
 		return (l ? 'y' : 'n') + (u ? 'y' : 'n') + (r ? 'y' : 'n') + (d ? 'y' : 'n');
 	};
+	this.is_valid_coordinates = function is_valid_coordinates(x, y) {
+		return (x >= 0 && y >= 0 && x < this.w && y < this.h);
+	}
 	this.is_solid = function is_solid(square_value) {
 		return (this.is_wall(square_value) || this.is_door(square_value));
 	};
@@ -65,6 +68,12 @@ function LD25Level() {
 	this.close_door = function close_door(x, y) {
 		this.layout[y][x] = 3;
 	};
+	this.person_at = function person_at(x, y) {
+		for (var p = 0; p < this.people.length; p++) {
+			if (this.people[p].is_at(x, y)) return true;
+		}
+		return false;
+	}
 	this.sprite_map = function sprite_map(x, y) {
 		var l = (x == 0 ? false : this.is_solid(this.layout[y][x - 1]))
 		var u = (y == 0 ? false : this.is_solid(this.layout[y - 1][x]))
@@ -74,6 +83,23 @@ function LD25Level() {
 	};
 	this.people = new Array();
 	this.logic = function logic(engine, elapsed) {
+		var x = Math.floor(engine.mouse.x / this.block_size);
+		var y = Math.floor(engine.mouse.y / this.block_size);
+		
+		if (engine.mouse.is_down()) {
+			if (engine.mouse['down']) {
+				if (!this.person_at(x, y)) {
+					if (this.is_door_open(this.layout[y][x])) {
+						this.close_door(x, y);
+					}
+					else if (this.is_door_closed(this.layout[y][x])) {
+						this.open_door(x, y);
+					}
+				}
+				engine.mouse['down'] = false;
+			}
+		}
+		
 		for (var p = 0; p < this.people.length; p++) {
 			this.people[p].logic(engine, elapsed, this);
 		}

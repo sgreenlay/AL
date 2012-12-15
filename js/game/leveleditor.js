@@ -18,7 +18,7 @@ function LD25Editor(level) {
 				}
 			}
 		}
-		if (engine.mouse.is_down) {
+		if (engine.mouse.is_down()) {
 			var x = Math.floor(engine.mouse.x / this.level.block_size);
 			var y = Math.floor(engine.mouse.y / this.level.block_size);
 			if (this.mode >= 48 && this.mode <= 51) {
@@ -37,7 +37,7 @@ function LD25Editor(level) {
 		
 		var x_offset = Math.floor(engine.mouse.x / this.level.block_size) * this.level.block_size;
 		var y_offset = Math.floor(engine.mouse.y / this.level.block_size) * this.level.block_size;
-		var colour = (engine.mouse.is_down == 1 ? "rgba(0, 255, 0, 0.5)" : "rgba(255, 0, 0, 0.5)")
+		var colour = (engine.mouse.is_down() ? "rgba(0, 255, 0, 0.5)" : "rgba(255, 0, 0, 0.5)")
 		engine.graphics.draw_rectangle(x_offset, y_offset, this.level.block_size, this.level.block_size, colour);
 	}
 }
