@@ -50,6 +50,9 @@ function GameCore(canvas, gameContent) {
 	};
 	this.run = function run() {
 		var self = this;
+		if (this.gameContent) {
+			this.gameContent.init(this);
+		}
 		canvas.onselectstart = function () {
 			return false;
 		}

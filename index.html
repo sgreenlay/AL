@@ -22,8 +22,20 @@
 		</canvas>
 	</div>
 	<div id="footer">built by <a href="http://greenlay.net">@sgreenlay</a> for <a href="http://www.ludumdare.com/compo/">#LD48</a> 25</div>
-	<script type='text/javascript' src='js/graphics.js'></script>
-	<script type='text/javascript' src='js/engine.js'></script>
-	<script type='text/javascript' src='js/game.js'></script>
+	<script type='text/javascript' src='js/engine/graphics.js'></script>
+	<script type='text/javascript' src='js/engine/engine.js'></script>
+	<script type='text/javascript' src='js/game/assets/level.js'></script>
+	<script type='text/javascript' src='js/game/assets/spritemap.js'></script>
+	<script type='text/javascript' src='js/game/game.js'></script>
+	<script>
+		var canvas = document.getElementById('game');
+		if (canvas.getContext){
+			var game = new GameCore(canvas, new LD25());
+			game.run();
+		}
+		else {
+			// TODO: canvas is not supported
+		}
+	</script>
 </body>
 </html>

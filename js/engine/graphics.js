@@ -6,6 +6,9 @@
 
 function GraphicsCore(context) {
 	this.context = context;
+	this.load_sprites = function load_sprites(spritemap) {
+		this.sprites = spritemap;
+	};
 	this.draw_rectangle = function draw_rectangle(x, y, w, h, colour) {
 		this.context.fillStyle = colour;
 		this.context.fillRect(x, y, w, h);
@@ -23,4 +26,8 @@ function GraphicsCore(context) {
 			}
 		}
 	};
+	this.draw_sprite = function draw_sprite(name, x, y, width, height) {
+		var sprite = this.sprites[name];
+		this.context.drawImage(this.sprites.sheet, sprite.sx, sprite.sy, sprite.sw, sprite.sh, x, y, width, height);
+	}
 }
