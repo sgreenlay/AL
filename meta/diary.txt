@@ -6,4 +6,11 @@ Got game loop, fps counter working.
 Found lots of computer crashing bugs in Chrome/Safari.
 Mouse stopped working :(.
 
+=======
+Hour 2
+=======
 
+Got basic engine structure + event handling working.
+Came up with an idea for the game. Player is a HAL-like computer
+and must prevent astronauts from disactivating it/escaping. Still
+thinking about how gameplay would work.
