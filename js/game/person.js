@@ -92,7 +92,7 @@ function LD25Person(x, y) {
 				
 				if (level.is_door_closed(level.layout[y][x])) {
 					var self = this;
-					this.waiting.duration = 2000;
+					this.waiting.duration = 4000;
 					this.waiting.condition = function is_door_open(level) {
 						return level.is_door_open(level.layout[y][x]);
 					};

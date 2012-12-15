@@ -83,3 +83,9 @@ Hour 20.5
 =======
 
 Got distracted trying to fix enclosed edges. Mostly works, but there are some unsatisfied corner cases.
+
+=======
+Hour 21
+=======
+
+Added solar panels. Started thinking about how to do people tasks, interruping sequences of tasks, etc.

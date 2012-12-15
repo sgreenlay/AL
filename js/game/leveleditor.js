@@ -8,7 +8,7 @@ function LD25Editor(level) {
 	this.level = level;
 	this.needs_reset = true;
 	this.mode = 0;
-	this.keys = [48, 49, 50, 51, 80];
+	this.keys = [48, 49, 50, 51, 53, 80];
 	this.logic = function logic(engine, elapsed) {
 		for (var k = 0; k < this.keys.length; k++) {
 			if (engine.keyboard.is_key_down(this.keys[k])) {

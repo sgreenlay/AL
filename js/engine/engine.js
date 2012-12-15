@@ -31,7 +31,7 @@ function GameCore(canvas, gameContent) {
 			this.gameContent.render(this);
 		}
 		if (this.should_render_fps) {
-			this.graphics.draw_text(4, 20, this.current_fps.toString() + " fps", 22, "rgba(0, 0, 0, 1.0)");
+			this.graphics.draw_text(4, 20, this.current_fps.toString() + " fps", 22, "#FAE309");
 		}
 	};
 	this.logic = function logic(elapsed) {

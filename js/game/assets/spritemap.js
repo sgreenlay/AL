@@ -14,6 +14,12 @@ function LD25Sprites() {
 		sw : 20,
 		sh : 20
 	};
+	this['solar'] = {
+		sx : 100,
+		sy : 160,
+		sw : 20,
+		sh : 20
+	};
 	this['nnnn'] = {
 		sx : 0,
 		sy : 0,
