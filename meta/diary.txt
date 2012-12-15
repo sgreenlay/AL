@@ -52,3 +52,10 @@ Hour 15
 =======
 
 Got a basic person drawing + moving + thinking.
+
+=======
+Hour 16
+=======
+
+Food break.
+Did some person fixes, made doors open/close.

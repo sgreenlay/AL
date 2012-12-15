@@ -19,9 +19,9 @@ function LD25Level() {
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 3, 2, 2, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -44,14 +44,32 @@ function LD25Level() {
 	this.generate_sprite_string = function (l, u, r, d) {
 		return (l ? 'y' : 'n') + (u ? 'y' : 'n') + (r ? 'y' : 'n') + (d ? 'y' : 'n');
 	};
+	this.is_solid = function is_solid(square_value) {
+		return (this.is_wall(square_value) || this.is_door(square_value));
+	};
 	this.is_wall = function is_wall(square_value) {
-		return (square_value == 1 || square_value == 3)
+		return (square_value == 1);
+	};
+	this.is_door = function is_door(square_value) {
+		return (this.is_door_open(square_value) || this.is_door_closed(square_value));
+	};
+	this.is_door_open = function is_door_open(square_value) {
+		return (square_value == 4);
+	};
+	this.is_door_closed = function is_door_closed(square_value) {
+		return (square_value == 3);
+	};
+	this.open_door = function open_door(x, y) {
+		this.layout[y][x] = 4;
+	};
+	this.close_door = function close_door(x, y) {
+		this.layout[y][x] = 3;
 	};
 	this.sprite_map = function sprite_map(x, y) {
-		var l = (x == 0 ? false : this.is_wall(this.layout[y][x - 1]))
-		var u = (y == 0 ? false : this.is_wall(this.layout[y - 1][x]))
-		var r = (x == this.w - 1 ? false : this.is_wall(this.layout[y][x + 1]))
-		var d = (y == this.h - 1 ? false : this.is_wall(this.layout[y + 1][x]))
+		var l = (x == 0 ? false : this.is_solid(this.layout[y][x - 1]))
+		var u = (y == 0 ? false : this.is_solid(this.layout[y - 1][x]))
+		var r = (x == this.w - 1 ? false : this.is_solid(this.layout[y][x + 1]))
+		var d = (y == this.h - 1 ? false : this.is_solid(this.layout[y + 1][x]))
 		return this.generate_sprite_string(l, u, r, d);
 	};
 	this.people = new Array();
@@ -72,7 +90,10 @@ function LD25Level() {
 					engine.graphics.draw_sprite('floor', x_offset, y_offset, this.block_size, this.block_size);
 				}
 				else if (this.layout[y][x] == 3) {
-					engine.graphics.draw_sprite('door-' + this.sprite_map(x, y), x_offset, y_offset, this.block_size, this.block_size);
+					engine.graphics.draw_sprite('close-door-' + this.sprite_map(x, y), x_offset, y_offset, this.block_size, this.block_size);
+				}
+				else if (this.layout[y][x] == 4) {
+					engine.graphics.draw_sprite('open-door-' + this.sprite_map(x, y), x_offset, y_offset, this.block_size, this.block_size);
 				}
 			}
 		}

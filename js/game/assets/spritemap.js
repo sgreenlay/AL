@@ -9,8 +9,8 @@ function LD25Sprites() {
 	this.sheet.src = 'img/sprites.png';
 	this.sprites = {};
 	this['wtf'] = {
-		sx : 100,
-		sy : 0,
+		sx : 40,
+		sy : 80,
 		sw : 20,
 		sh : 20
 	};
@@ -32,21 +32,33 @@ function LD25Sprites() {
 		sw : 20,
 		sh : 20
 	};
-	this['door-nyny'] = {
+	this['close-door-nyny'] = {
+		sx : 40,
+		sy : 0,
+		sw : 20,
+		sh : 20
+	};
+	this['close-door-ynyn'] = {
 		sx : 60,
 		sy : 0,
 		sw : 20,
 		sh : 20
 	};
-	this['door-ynyn'] = {
+	this['open-door-nyny'] = {
 		sx : 80,
 		sy : 0,
 		sw : 20,
 		sh : 20
 	};
-	this['floor'] = {
-		sx : 40,
+	this['open-door-ynyn'] = {
+		sx : 100,
 		sy : 0,
+		sw : 20,
+		sh : 20
+	};
+	this['floor'] = {
+		sx : 20,
+		sy : 80,
 		sw : 20,
 		sh : 20
 	};
@@ -135,9 +147,9 @@ function LD25Sprites() {
 		sh : 20
 	};
 	this['person'] = {
-		sx : 0,
-		sy : 80,
-		sw : 20,
-		sh : 20
+		sx : 1,
+		sy : 81,
+		sw : 19,
+		sh : 19
 	};
 }
