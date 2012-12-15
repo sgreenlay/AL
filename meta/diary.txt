@@ -77,3 +77,9 @@ Hour 19
 =======
 
 Exercise break.
+
+=======
+Hour 20.5
+=======
+
+Got distracted trying to fix enclosed edges. Mostly works, but there are some unsatisfied corner cases.

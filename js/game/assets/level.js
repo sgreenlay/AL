@@ -19,9 +19,9 @@ function LD25Level() {
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 3, 2, 2, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 3, 2, 2, 3, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -41,9 +41,6 @@ function LD25Level() {
 	this.h = 30;
 	this.block_size = 20;
 	
-	this.generate_sprite_string = function (l, u, r, d) {
-		return (l ? 'y' : 'n') + (u ? 'y' : 'n') + (r ? 'y' : 'n') + (d ? 'y' : 'n');
-	};
 	this.is_valid_coordinates = function is_valid_coordinates(x, y) {
 		return (x >= 0 && y >= 0 && x < this.w && y < this.h);
 	}
@@ -75,11 +72,29 @@ function LD25Level() {
 		return false;
 	}
 	this.sprite_map = function sprite_map(x, y) {
-		var l = (x == 0 ? false : this.is_solid(this.layout[y][x - 1]))
-		var u = (y == 0 ? false : this.is_solid(this.layout[y - 1][x]))
-		var r = (x == this.w - 1 ? false : this.is_solid(this.layout[y][x + 1]))
-		var d = (y == this.h - 1 ? false : this.is_solid(this.layout[y + 1][x]))
-		return this.generate_sprite_string(l, u, r, d);
+		var l = (!this.is_valid_coordinates(x - 1, y) || !this.is_solid(this.layout[y][x - 1])) ? 'n' : 'y';
+		var u = (!this.is_valid_coordinates(x, y - 1) || !this.is_solid(this.layout[y - 1][x])) ? 'n' : 'y';
+		var r = (!this.is_valid_coordinates(x + 1, y) || !this.is_solid(this.layout[y][x + 1])) ? 'n' : 'y';
+		var d = (!this.is_valid_coordinates(x, y + 1) || !this.is_solid(this.layout[y + 1][x])) ? 'n' : 'y';
+		
+		if (l === 'y' && u === 'y' && this.is_valid_coordinates(x - 1, y - 1) && this.is_solid(this.layout[y - 1][x - 1])) {
+			l = '1';
+			u = '1';
+		}
+		if ((u === 'y' || u === '1') && r === 'y' && this.is_valid_coordinates(x + 1, y - 1) && this.is_solid(this.layout[y - 1][x + 1])) {
+			u = (u === '1') ? '2' : '1';
+			r = '1';
+		}
+		if ((r === 'y' || r === '1') && d === 'y' && this.is_valid_coordinates(x + 1, y + 1) && this.is_solid(this.layout[y + 1][x + 1])) {
+			r = (r === '1') ? '2' : '1';
+			d = '1';
+		}
+		if ((d === 'y' || d === '1') && (l === 'y' || l === '1') && this.is_valid_coordinates(x - 1, y + 1) && this.is_solid(this.layout[y + 1][x - 1])) {
+			d = (d === '1') ? '2' : '1';
+			l = (l === '1') ? '2' : '1';
+		}
+		
+		return l + u + r + d;
 	};
 	this.people = new Array();
 	this.logic = function logic(engine, elapsed) {
