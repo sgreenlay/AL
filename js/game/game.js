@@ -26,6 +26,9 @@
 		if (this.mode === 'editor') {
 			this.editor.logic(engine, elapsed);
 		}
+		else {
+			this.level.logic(engine, elapsed);
+		}
 	}
 	this.render = function render(engine) {
 		engine.graphics.clear();
@@ -34,7 +37,7 @@
 			this.editor.render(engine);
 		}
 		else {
-			this.level.draw(engine);
+			this.level.render(engine);
 		}
 	}
 }

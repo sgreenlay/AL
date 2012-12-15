@@ -47,3 +47,8 @@ Hour 14
 
 Made level editor it's own entity, added doors and floors.
 
+=======
+Hour 15
+=======
+
+Got a basic person drawing + moving + thinking.

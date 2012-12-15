@@ -134,4 +134,10 @@ function LD25Sprites() {
 		sw : 20,
 		sh : 20
 	};
+	this['person'] = {
+		sx : 0,
+		sy : 80,
+		sw : 20,
+		sh : 20
+	};
 }
