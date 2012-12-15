@@ -9,6 +9,9 @@ function GraphicsCore(context) {
 	this.load_sprites = function load_sprites(spritemap) {
 		this.sprites = spritemap;
 	};
+	this.clear = function clear() {
+		this.context.clearRect(0, 0, 800, 600);
+	};
 	this.draw_rectangle = function draw_rectangle(x, y, w, h, colour) {
 		this.context.fillStyle = colour;
 		this.context.fillRect(x, y, w, h);

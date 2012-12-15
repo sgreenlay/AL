@@ -21,7 +21,7 @@ function GameCore(canvas, gameContent) {
 	this.render_fps = function render_fps() {
 		this.context.lineWidth = 1;
 		this.context.fillStyle = "rgba(0, 0, 0, 1.0)";
-		this.context.font = "18px sans-serif";
+		this.context.font = "22px Strait";
 		this.context.fillText(this.current_fps.toString() + " fps", 4, 20);
 	}
 	this.render = function render() {

@@ -38,7 +38,7 @@
 		 }
 	 }
 	 this.render = function render(engine) {
-		 //engine.graphics.draw_rectangle(0, 0, 800, 600, "rgba(255, 255, 255, 1.0)");
+		 engine.graphics.clear();
 		 engine.graphics.draw_grid(0, 0, 800, 600, this.level.block_size, "rgba(220, 220, 220, 1.0)", "rgba(255, 255, 255, 1.0)");
 		 
 		 this.level.draw(engine);
