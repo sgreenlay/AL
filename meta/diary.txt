@@ -71,3 +71,9 @@ Hour 18
 =======
 
 More bug fixes. Added speech bubbles to people.
+
+=======
+Hour 19
+=======
+
+Exercise break.
