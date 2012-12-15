@@ -65,3 +65,9 @@ Hour 17
 =======
 
 More bug fixes. Added first gameplay element (must open doors for people).
+
+=======
+Hour 18
+=======
+
+More bug fixes. Added speech bubbles to people.

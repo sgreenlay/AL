@@ -13,6 +13,7 @@ function GameCore(canvas, gameContent) {
 	this.total_elapsed = 0;
 	this.current_fps = 0;
 	this.fps_counter = 0;
+	this.should_render_fps = false;
 	this.mouse = {
 		x : 0,
 		y : 0,
@@ -25,19 +26,21 @@ function GameCore(canvas, gameContent) {
 			return (typeof this[keyCode] != 'undefined');
 		}
 	};
-	this.render_fps = function render_fps() {
-		this.context.lineWidth = 1;
-		this.context.fillStyle = "rgba(0, 0, 0, 1.0)";
-		this.context.font = "22px Strait";
-		this.context.fillText(this.current_fps.toString() + " fps", 4, 20);
-	}
 	this.render = function render() {
 		if (this.gameContent) {
 			this.gameContent.render(this);
 		}
-		this.render_fps();
+		if (this.should_render_fps) {
+			this.graphics.draw_text(4, 20, this.current_fps.toString() + " fps", 22, "rgba(0, 0, 0, 1.0)");
+		}
 	};
 	this.logic = function logic(elapsed) {
+		if (this.keyboard.is_key_down(192)) {
+			if (this.keyboard[192]) {
+				this.should_render_fps = !this.should_render_fps;
+				this.keyboard[192] = false;
+			}
+		}
 		this.fps_counter++;
 		this.total_elapsed += elapsed;
 		if (this.total_elapsed > 1000) {

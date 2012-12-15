@@ -26,6 +26,12 @@ function LD25Person(x, y) {
 		condition : null
 	};
 	this.waiting_task = null;
+	this.speak = function say(text) {
+		this['speech'] = text;
+	};
+	this.stop_speaking = function stop_speaking() {
+		delete this['speech'];
+	};
 	this.logic = function logic(engine, elapsed, level) {
 		if (this.waiting.duration > 0) {
 			if (this.waiting.condition(level)) {
@@ -35,7 +41,7 @@ function LD25Person(x, y) {
 				}
 			}
 			this.waiting.duration -= elapsed;
-			if (this.waiting <= 0) {
+			if (this.waiting.duration <= 0) {
 				this.waiting.duration = 0;
 				if (this.waiting.on_failure) {
 					this.waiting.on_failure(level);
@@ -61,12 +67,6 @@ function LD25Person(x, y) {
 				
 				var x = this.x + dx;
 				var y = this.y + dy;
-				
-				if (level.is_valid_coordinates(this.y + (-1 * this.move_y), this.x + (-1 * this.move_x)) &&
-				    level.is_door_open(level.layout[this.y + (-1 * this.move_y)][this.x + (-1 * this.move_x)]))
-				{
-					level.close_door(this.x + (-1 * this.move_x), this.y + (-1 * this.move_y));
-				}
 			
 				while ((dx == 0 && dy == 0) || !level.is_valid_coordinates(x, y) || level.is_wall(level.layout[y][x])) {
 					var direction = Math.floor((Math.random() * 4));
@@ -92,17 +92,21 @@ function LD25Person(x, y) {
 				
 				if (level.is_door_closed(level.layout[y][x])) {
 					var self = this;
-					this.waiting.duration = 100000;
+					this.waiting.duration = 2000;
 					this.waiting.condition = function is_door_open(level) {
 						return level.is_door_open(level.layout[y][x]);
 					};
 					this.waiting.on_success = function on_success(level) {
 						self.move_x = dx;
 						self.move_y = dy;
+						self.stop_speaking();
 					};
 					this.waiting.on_failure = function on_failure(level) {
-						// TODO
+						self.move_x = 0;
+						self.move_y = 0;
+						self.stop_speaking();
 					};
+					this.speak("Open the door AL!");
 				}
 				else {
 					this.move_x = dx;
@@ -115,5 +119,8 @@ function LD25Person(x, y) {
 		var x_offset = this.x * level.block_size + this.offset_x;
 		var y_offset = this.y * level.block_size + this.offset_y;
 		engine.graphics.draw_sprite('person', x_offset, y_offset, level.block_size, level.block_size);
+		if (typeof this['speech'] != 'undefined') {
+			engine.graphics.draw_speech_bubble(x_offset + level.block_size / 2, y_offset, this['speech'], 14, "rgba(100, 100, 100, 1.0)", "rgba(255, 255, 255, 1.0)", 2);
+		}
 	};
 };

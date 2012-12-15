@@ -39,4 +39,25 @@ function GraphicsCore(context) {
 		}
 		this.context.drawImage(this.sprites.sheet, sprite.sx, sprite.sy, sprite.sw, sprite.sh, x, y, width, height);
 	}
+	this.draw_text = function draw_text(x, y, text, size, colour) {
+		this.context.lineWidth = 1;
+		this.context.fillStyle = colour;
+		this.context.font = size.toString() + "px Strait";
+		this.context.fillText(text, x, y);
+	}
+	this.draw_speech_bubble = function draw_speech_bubble(x, y, text, size, on_colour, off_colour, padding) {
+		this.context.lineWidth = 1;
+		this.context.fillStyle = on_colour;
+		this.context.textBaseline = 'bottom';
+		this.context.font = size.toString() + "px Strait";
+		var metrics = this.context.measureText(text);
+		var width = metrics.width + 2 * padding + 4;
+		var height = size + 2 * padding + 4;
+		this.draw_rectangle(x - (width / 2), y - height, width, height, on_colour);
+		if (padding > 0) {
+			this.draw_rectangle(x - (width / 2) + padding, y - height + padding, width - 2 * padding, height - 2 * padding, off_colour);
+		}
+		this.context.fillStyle = on_colour;
+		this.context.fillText(text, x - (width / 2) + padding + 2, y - height + padding + 2 + size);
+	}
 }
