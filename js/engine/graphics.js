@@ -30,7 +30,13 @@ function GraphicsCore(context) {
 		}
 	};
 	this.draw_sprite = function draw_sprite(name, x, y, width, height) {
-		var sprite = this.sprites[name];
+		var sprite;
+		if (typeof this.sprites[name] != 'undefined') {
+			sprite = this.sprites[name];
+		}
+		else {
+			sprite = this.sprites['wtf'];
+		}
 		this.context.drawImage(this.sprites.sheet, sprite.sx, sprite.sy, sprite.sw, sprite.sh, x, y, width, height);
 	}
 }

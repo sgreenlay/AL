@@ -8,6 +8,12 @@ function LD25Sprites() {
 	this.sheet = new Image();
 	this.sheet.src = 'img/sprites.png';
 	this.sprites = {};
+	this['wtf'] = {
+		sx : 100,
+		sy : 0,
+		sw : 20,
+		sh : 20
+	};
 	this['nnnn'] = {
 		sx : 0,
 		sy : 0,
@@ -16,6 +22,30 @@ function LD25Sprites() {
 	};
 	this['yyyy'] = {
 		sx : 20,
+		sy : 0,
+		sw : 20,
+		sh : 20
+	};
+	this['floor'] = {
+		sx : 40,
+		sy : 0,
+		sw : 20,
+		sh : 20
+	};
+	this['door-nyny'] = {
+		sx : 60,
+		sy : 0,
+		sw : 20,
+		sh : 20
+	};
+	this['door-ynyn'] = {
+		sx : 80,
+		sy : 0,
+		sw : 20,
+		sh : 20
+	};
+	this['floor'] = {
+		sx : 40,
 		sy : 0,
 		sw : 20,
 		sh : 20

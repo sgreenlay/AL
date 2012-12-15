@@ -43,22 +43,30 @@ function LD25Level() {
 	
 	this.generate_sprite_string = function (l, u, r, d) {
 		return (l ? 'y' : 'n') + (u ? 'y' : 'n') + (r ? 'y' : 'n') + (d ? 'y' : 'n');
-	}
-	
+	};
+	this.is_wall = function is_wall(square_value) {
+		return (square_value == 1 || square_value == 3)
+	};
 	this.sprite_map = function sprite_map(x, y) {
-		var l = (x == 0 ? false : (this.layout[y][x - 1] == 1))
-		var u = (y == 0 ? false : (this.layout[y - 1][x] == 1))
-		var r = (x == this.w - 1 ? false : (this.layout[y][x + 1] == 1))
-		var d = (y == this.h - 1 ? false : (this.layout[y + 1][x] == 1))
+		var l = (x == 0 ? false : this.is_wall(this.layout[y][x - 1]))
+		var u = (y == 0 ? false : this.is_wall(this.layout[y - 1][x]))
+		var r = (x == this.w - 1 ? false : this.is_wall(this.layout[y][x + 1]))
+		var d = (y == this.h - 1 ? false : this.is_wall(this.layout[y + 1][x]))
 		return this.generate_sprite_string(l, u, r, d);
-	}
+	};
 	this.draw = function draw(engine) {
 		for (var y = 0; y < this.h; y++) {
 			for (var x = 0; x < this.w; x++) {
+				var x_offset = x * this.block_size;
+				var y_offset = y * this.block_size;
 				if (this.layout[y][x] == 1) {
-					var x_offset = x * this.block_size;
-					var y_offset = y * this.block_size;
 					engine.graphics.draw_sprite(this.sprite_map(x, y), x_offset, y_offset, this.block_size, this.block_size);
+				}
+				else if (this.layout[y][x] == 2) {
+					engine.graphics.draw_sprite('floor', x_offset, y_offset, this.block_size, this.block_size);
+				}
+				else if (this.layout[y][x] == 3) {
+					engine.graphics.draw_sprite('door-' + this.sprite_map(x, y), x_offset, y_offset, this.block_size, this.block_size);
 				}
 			}
 		}

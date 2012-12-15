@@ -17,7 +17,12 @@ function GameCore(canvas, gameContent) {
 		x : 0,
 		y : 0,
 		is_down: false
-	}
+	};
+	this.keyboard = {
+		is_key_down : function is_key_down(keyCode) {
+			return (typeof this[keyCode] != 'undefined');
+		}
+	};
 	this.render_fps = function render_fps() {
 		this.context.lineWidth = 1;
 		this.context.fillStyle = "rgba(0, 0, 0, 1.0)";
@@ -71,6 +76,19 @@ function GameCore(canvas, gameContent) {
 		    self.mouse.x = e.layerX;
 		    self.mouse.y = e.layerY;
 			self.mouse.is_down = false;
+			e.cancelBubble = true;
+		};
+		// keyboard workaround: capture document instead of canvas
+		document.onkeydown = function(e) {
+			if (typeof self.keyboard[e.keyCode] == 'undefined') {
+				self.keyboard[e.keyCode] = true;
+			}
+			e.cancelBubble = true;
+		};
+		document.onkeyup = function(e) {
+			if (typeof self.keyboard[e.keyCode] != 'undefined') {
+				delete self.keyboard[e.keyCode];
+			}
 			e.cancelBubble = true;
 		};
 		this.last_update = (new Date).getTime();
