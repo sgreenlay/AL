@@ -41,4 +41,9 @@ Hour 6 - 13
 
 Zzzzzzz...
 
+=======
+Hour 14
+=======
+
+Made level editor it's own entity, added doors and floors.
 
