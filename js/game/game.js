@@ -27,10 +27,10 @@
 			 this.needs_reset = true;
 		 }
 		 else if (this.needs_reset) {
-			 this.level_squares_touched = new Array(this.level.height);
-			 for (var y = 0; y < this.level.height; y++) {
-			 	this.level_squares_touched[y] = new Array(this.level.width);
-				for (var x = 0; x < this.level.width; x++) {
+			 this.level_squares_touched = new Array(this.level.h);
+			 for (var y = 0; y < this.level.h; y++) {
+			 	this.level_squares_touched[y] = new Array(this.level.w);
+				for (var x = 0; x < this.level.w; x++) {
 					this.level_squares_touched[y][x] = 0;
 				}
 			 }
@@ -41,15 +41,7 @@
 		 //engine.graphics.draw_rectangle(0, 0, 800, 600, "rgba(255, 255, 255, 1.0)");
 		 engine.graphics.draw_grid(0, 0, 800, 600, this.level.block_size, "rgba(220, 220, 220, 1.0)", "rgba(255, 255, 255, 1.0)");
 		 
-		 for (var y = 0; y < this.level.height; y++) {
-			 for (var x = 0; x < this.level.width; x++) {
-				 if (this.level.layout[y][x] == 1) {
-					 var x_offset = x * this.level.block_size;
-					 var y_offset = y * this.level.block_size;
-					 engine.graphics.draw_sprite('test', x_offset, y_offset, this.level.block_size, this.level.block_size);
-				 }
-			 }
-		 }
+		 this.level.draw(engine);
 		 
 		 var x_offset = Math.floor(engine.mouse.x / this.level.block_size) * this.level.block_size;
 		 var y_offset = Math.floor(engine.mouse.y / this.level.block_size) * this.level.block_size;

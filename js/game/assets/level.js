@@ -37,7 +37,30 @@ function LD25Level() {
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	];
-	this.width = 40;
-	this.height = 30;
+	this.w = 40;
+	this.h = 30;
 	this.block_size = 20;
+	
+	this.generate_sprite_string = function (l, u, r, d) {
+		return (l ? 'y' : 'n') + (u ? 'y' : 'n') + (r ? 'y' : 'n') + (d ? 'y' : 'n');
+	}
+	
+	this.sprite_map = function sprite_map(x, y) {
+		var l = (x == 0 ? false : (this.layout[y][x - 1] == 1))
+		var u = (y == 0 ? false : (this.layout[y - 1][x] == 1))
+		var r = (x == this.w - 1 ? false : (this.layout[y][x + 1] == 1))
+		var d = (y == this.h - 1 ? false : (this.layout[y + 1][x] == 1))
+		return this.generate_sprite_string(l, u, r, d);
+	}
+	this.draw = function draw(engine) {
+		for (var y = 0; y < this.h; y++) {
+			for (var x = 0; x < this.w; x++) {
+				if (this.layout[y][x] == 1) {
+					var x_offset = x * this.block_size;
+					var y_offset = y * this.block_size;
+					engine.graphics.draw_sprite(this.sprite_map(x, y), x_offset, y_offset, this.block_size, this.block_size);
+				}
+			}
+		}
+	}
 }

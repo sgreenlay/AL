@@ -27,3 +27,12 @@ Hour 4
 
 Mostly did gameplay brainstorming.
 Got a basic sprite drawing system working.
+
+=======
+Hour 5
+=======
+
+Tired.
+Made some nicer looking walls that join together nicely.
+
+
