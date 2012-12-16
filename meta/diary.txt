@@ -158,3 +158,10 @@ Hour 44.5
 
 Spent far too much time bug fixing. There is still a framerate problem...
 Exercise Break.
+
+=======
+Hour 45
+=======
+
+Refactored a bit, started working on airlocks.
+NEED TO GET SOME GAMEPLAY!

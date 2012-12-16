@@ -16,7 +16,7 @@
 		})();
 	  </script>
 </head>
-<body>
+<body onload='game_init()'>
 	<div id="content">
 		<canvas id="game-background" width="800" height="600"></canvas>
 		<canvas id="game-foreground" width="800" height="600"></canvas>
@@ -24,20 +24,23 @@
 	<div id="footer">built in 24h by <a href="http://greenlay.net">@sgreenlay</a> for <a href="http://www.ludumdare.com/compo/">#LD48</a> 25</div>
 	<script type='text/javascript' src='js/engine/graphics.js'></script>
 	<script type='text/javascript' src='js/engine/engine.js'></script>
+	<script type='text/javascript' src='js/game/helper.js'></script>
 	<script type='text/javascript' src='js/game/assets/level.js'></script>
 	<script type='text/javascript' src='js/game/assets/spritemap.js'></script>
 	<script type='text/javascript' src='js/game/person.js'></script>
 	<script type='text/javascript' src='js/game/leveleditor.js'></script>
 	<script type='text/javascript' src='js/game/game.js'></script>
 	<script>
-		var canvas_f = document.getElementById('game-foreground');
-		var canvas_b = document.getElementById('game-background');
-		if (canvas_f.getContext){
-			var game = new GameCore(canvas_f, canvas_b, new LD25());
-			game.run();
-		}
-		else {
-			// TODO: canvas is not supported
+		function game_init() {
+			var canvas_f = document.getElementById('game-foreground');
+			var canvas_b = document.getElementById('game-background');
+			if (canvas_f.getContext){
+				var game = new GameCore(canvas_f, canvas_b, new LD25());
+				game.run()
+			}
+			else {
+				// TODO: canvas is not supported
+			}
 		}
 	</script>
 </body>
