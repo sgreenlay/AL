@@ -89,3 +89,9 @@ Hour 21
 =======
 
 Added solar panels. Started thinking about how to do people tasks, interruping sequences of tasks, etc.
+
+=======
+Hour 22
+=======
+
+Food break.
