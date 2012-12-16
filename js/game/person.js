@@ -29,6 +29,7 @@ function LD25Person(x, y) {
 		},
 		{
 			task : 'wait',
+			duration : 5000,
 			text : 'Computering'
 		},
 		{
@@ -39,81 +40,120 @@ function LD25Person(x, y) {
 			}
 		}
 	];
-	this.current_intent = 0;
-	this.reconstruct_path = function reconstruct_path(a_star, x_i, y_i, x_d, y_d) {
-		//
-	};
-	this.find_path = function find_path(level, x_i, y_i, x_d, y_d) {
-		var xy_hash = function(x, y) {
-			return x.toString() + ',' + y.toString;
-		};
-		var reconstruct_path = function(came_from, x, y) {
-			// TODO
-		};
-		var heuristic = function(x_i, y_i, x_d, y_d) {
-			// TODO
-			return 0;
-		};
-		
-		var open_set = new Object();
-		open_set[xy_hash(x_i, y_i)] = {
-			x : x_i,
-			y : y_i
-		};
-		
-		var closed_set = new Object();
-		
-		var g = new Object();
-		g[xy_hash(x_i, y_i)] = 0;
-		
-		var f = new Object();
-		f[xy_hash(x_i, y_i)] = g[xy_hash(x_i, y_i)] + heuristic(x_i, y_i, x_d, y_d);
-		
-		var came_from = new Object();
-		
-		while (Object.keys(open_set).length > 0) {
-			var current = null;
-			for (hash in open_set) {
-				if (current == null || f[current] > f[hash]) {
-					current = hash;
+	this.current_intent = -1;
+	this.act_on_next_intent = function act_on_next_intent(level) {
+		if (this.intents.length > 0) {
+			this.current_intent = (this.current_intent + 1) % this.intents.length;
+			var intent = this.intents[this.current_intent];
+			if (intent.task === 'move') {
+				/*
+				this.path = this.find_path(level, this.x, this.y, intent.x, intent.y);
+				if (this.path == null) {
+					// TODO
 				}
+				*/
 			}
-			if (current === xy_hash(x_d, y_d)) function {}(args) {
-				return reconstruct_path(came_from, x_d, y_d);
+			else if (intent.task === 'wait') {
+				var self = this;
+				this.waiting.duration = intent.duration;
+				this.waiting.condition = function is_door_open(level) {
+					return false;
+				};
+				this.waiting.on_success = function on_success(level) {
+					// should never be called
+				};
+				this.waiting.on_failure = function on_failure(level) {
+					self.stop_speaking();
+					self.act_on_next_intent(level);
+				};
+				this.speak(intent.text);
 			}
-			closed_set[current] = open_set[current];
-			delete open_set[current];
-			
+		}
+	};
+	this.xy_hash = function xy_hash(x, y) {
+		return x.toString() + ',' + y.toString();
+	};
+	this.generate_graph = function generate_graph(level, x, y) {
+		var self = this;
+		var graph = new Object();
+		var find_neighbours = function find_neighbours(x, y) {
+			graph[self.xy_hash(x, y)] = {
+				point : {
+					x : x,
+					y : y
+				},
+				neighbours : new Array()
+			};
 			for (var i = 0; i < 4; i++) {
-				var x = closed_set[current].x;
-				var y = closed_set[current].y;
+				var x_n = x;
+				var y_n = y;
 				switch (i) {
 					case 0: // l
-						x = x - 1;
+						x_n = x - 1;
 						break;
 					case 1: // u
-						y = y - 1;
+						y_n = y - 1;
 						break;
 					case 2: // r
-						x = x + 1
+						x_n = x + 1
 						break;
 					case 3: // d
-						y = y + 1;
+						y_n = y + 1;
 						break;
 				}
-				if (typeof closed_set[xy_hash(x, y)] == 'undefined' && level.is_valid_coordinates(x, y) && !level.is_wall(level.layout[y][x])) {
-					var tentitive_g = g[current] + 1;
-					if (typeof open_set[xy_hash(x, y)] == 'undefined' || tentitive_g <= g[xy_hash(x, y)]) {
-						came_from[xy_hash(x, y)] = closed_set[current];
-						g[xy_hash(x, y)] = tentitive_g;
-						f[xy_hash(x, y)] = g[xy_hash(x, y)] + heuristic(x, y, x_d, y_d);
-						if (typeof open_set[xy_hash(x, y)] == 'undefined') {
-							open_set[xy_hash(x, y)] = {
-								x : x,
-								y : y
-							};
-						}
+				if (level.is_valid_coordinates(x_n, y_n) && !level.is_wall(level.layout[y_n][x_n])) {
+					graph[self.xy_hash(x, y)].neighbours.push(self.xy_hash(x_n, y_n));
+					if (typeof graph[self.xy_hash(x_n, y_n)] == 'undefined') {
+						find_neighbours(x_n, y_n);
 					}
+				}
+			}
+		}
+		find_neighbours(x, y);
+		return graph;
+	};
+	this.find_path = function find_path(level, x_i, y_i, x_d, y_d) {
+		var graph = this.generate_graph(level, x_i, y_i);
+		
+		var distances = new Object();
+		var Q = new Object();
+		
+		for (v in graph) {
+			distances[v] = Infinity;
+			Q[v] = true;
+		}
+		
+		var previous = new Object();
+		distances[this.xy_hash(x_i, y_i)] = 0;
+		
+		while (Object.keys(Q).length > 0) {
+			var u = null
+			for (v in Q) {
+				if (u == null || distances[u] > distances[v]) {
+					u = v;
+				}
+			}
+			
+			if (u === this.xy_hash(x_d, y_d)) {
+				var path = new Array();
+				path.push(graph[u].point);
+				while (typeof previous[u] != 'undefined') {
+					path.unshift(graph[previous[u]].point);
+					u = previous[u];
+				}
+				return path;
+			}
+			
+			delete Q[u];
+			if (distances[u] == Infinity) {
+				break;
+			}
+			for (var i = 0; i < graph[u].neighbours.length; i++) {
+				var v = graph[u].neighbours[i];
+				var alt = distances[u] + 1;
+				if (alt < distances[v]) {
+					distances[v] = alt;
+					previous[v] = u;
 				}
 			}
 		}
