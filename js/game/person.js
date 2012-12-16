@@ -56,9 +56,16 @@ function LD25Person(x, y, num, intents) {
 		}
 		else if (intent.task === 'retry') {
 			if (this.trying_to_fix_al) {
-				if (level.is_door_open(level.layout[intent.door.y][intent.door.x]) && 
-				    this.act_on_intent(level, this.old_intents[this.old_current_intent]))
+				var al_opened_door = false;
+				for (var i = 0; i < intent.doors.length; i++) {
+					if (level.is_door_open(level.layout[intent.doors[i].y][intent.doors[i].x])) {
+						al_opened_door = true;
+						break;
+					}
+				}
+				if (al_opened_door && this.act_on_intent(level, this.old_intents[this.old_current_intent]))
 				{
+					this.trying_to_fix_al = false;
 					this.current_intent = this.old_current_intent;
 					this.intents = this.old_intents;
 					this.old_current_intent = -1;
@@ -194,10 +201,14 @@ function LD25Person(x, y, num, intents) {
 	};
 	this.trying_to_fix_al = false;
 	this.try_to_fix_al = function try_to_stop_al(level, x, y) {
-		this.trying_to_fix_al = true;
 		
-		this.old_intents = this.intents;
-		this.old_current_intent = this.current_intent;
+		if (this.trying_to_fix_al) {
+			for (var i = 0; i < this.intents[1].doors.length; i++) {
+				if (!level.is_door_open(level.layout[this.intents[1].doors[i].y][this.intents[1].doors[i].x])) {
+					level.layout[this.intents[1].doors[i].y][this.intents[1].doors[i].x] = 1;
+				}
+			}
+		}
 		
 		this.path = this.find_path_to_goal(level, this.x, this.y, function (x, y) {
 			for (var i = 0; i < 4; i++) {
@@ -226,66 +237,100 @@ function LD25Person(x, y, num, intents) {
 			}
 			return false;
 		});
+		
 		if (this.path != null) {
-			this.current_intent = -1;
-			this.intents = [
-				{
-					task : 'wait',
-					duration : 5000,
-					text : 'door -f open'
-				},
-				{
-					task : 'retry',
-					door : {
-						x : x,
-						y : y
+			if (this.trying_to_fix_al) {
+				var path_to_computer = this.path;
+				var can_act_on_intent = this.act_on_intent(level, this.old_intents[this.old_current_intent]);
+				
+				for (var i = 0; i < this.intents[1].doors.length; i++) {
+					if (level.layout[this.intents[1].doors[i].y][this.intents[1].doors[i].x] == 1) {
+						level.layout[this.intents[1].doors[i].y][this.intents[1].doors[i].x] = 3;
 					}
-				},
-				{
-					task : 'wait',
-					duration : 3000,
-					say : 'Damn it, I\'ll have to restart AL.'
-				},
-				{
-					task : 'retry',
-					door : {
-						x : x,
-						y : y
-					}
-				},
-				{
-					task : 'wait',
-					duration : 3000,
-					text : 'AL -f restart'
-				},
-				{
-					task : 'endgame'
 				}
-			];
+				
+				if (can_act_on_intent) {
+					this.trying_to_fix_al = false;
+					this.current_intent = this.old_current_intent;
+					this.intents = this.old_intents;
+					this.old_current_intent = -1;
+					this.old_intents = null;
+					return;
+				}
+				
+				this.path = path_to_computer;
+				this.intents[1].doors.unshift({
+					x : x,
+					y : y
+				});
+			}
+			else {
+				this.trying_to_fix_al = true;
+		
+				this.old_intents = this.intents;
+				this.old_current_intent = this.current_intent;
+				
+				this.current_intent = -1;
+				
+				this.intents = [
+					{
+						task : 'wait',
+						duration : 5000,
+						text : 'door -f open'
+					},
+					{
+						task : 'retry',
+						doors : [{
+							x : x,
+							y : y
+						}]
+					},
+					{
+						task : 'wait',
+						duration : 3000,
+						say : 'Damn it, I\'ll have to restart AL.'
+					},
+					{
+						task : 'wait',
+						duration : 3000,
+						text : 'AL -f restart'
+					},
+					{
+						task : 'endgame'
+					}
+				];
+			}
 		}
 		else {
-			// PANIC!
+			if (this.trying_to_fix_al) {
+				for (var i = 0; i < this.intents[1].doors.length; i++) {
+					if (level.layout[this.intents[1].doors[i].y][this.intents[1].doors[i].x] == 1) {
+						level.layout[this.intents[1].doors[i].y][this.intents[1].doors[i].x] = 3;
+					}
+				}
+				this.intents[1].doors.unshift({
+					x : x,
+					y : y
+				});
+			}
+			
+			var self = this;
+			this.waiting.duration = 1000;
+			this.waiting.condition = function can_run(level) {
+				return false;
+			};
+			this.waiting.on_success = function on_success(level) {
+				// This should never be called...
+			};
+			this.waiting.on_failure = function on_failure(level) {
+				self.stop_speaking();
+				self.try_to_fix_al(level, x, y);
+			};
+			this.speak("I'm trapped!");
 		}
 	};
 	this.logic = function logic(engine, elapsed, level) {
-		if (!this.path && this.current_intent == -1) {
-			if (!this.act_on_next_intent(level)) {
-				var self = this;
-				this.waiting.duration = Infinity;
-				this.waiting.condition = function has_intent(level) {
-					return (this.intents && this.intents.length > 0);
-				};
-				this.waiting.on_success = function on_success(level) {
-					self.stop_speaking();
-					self.act_on_next_intent(level);
-				};
-				this.waiting.on_failure = function on_failure(level) {
-					// This should never be called
-				};
-				this.speak("I need something to do...");
-			}
-		}
-		else if (this.waiting.duration > 0) {
+		if (this.waiting.duration > 0) {
 			if (this.waiting.condition(level)) {
 				this.waiting.duration = 0;
 				if (this.waiting.on_success) {
@@ -300,6 +345,23 @@ function LD25Person(x, y, num, intents) {
 						this.waiting.on_failure(level);
 					}
 				}
+			}
+		}
+		else if (!this.path && this.current_intent == -1) {
+			if (!this.act_on_next_intent(level)) {
+				var self = this;
+				this.waiting.duration = Infinity;
+				this.waiting.condition = function has_intent(level) {
+					return (this.intents && this.intents.length > 0);
+				};
+				this.waiting.on_success = function on_success(level) {
+					self.stop_speaking();
+					self.act_on_next_intent(level);
+				};
+				this.waiting.on_failure = function on_failure(level) {
+					// This should never be called
+				};
+				this.speak("I need something to do...");
 			}
 		}
 		else {
@@ -334,31 +396,56 @@ function LD25Person(x, y, num, intents) {
 					var y = this.y + dy;
 				
 					if (level.is_door_closed(level.layout[y][x])) {
-						var self = this;
-						this.waiting.duration = 7500;
-						this.waiting.condition = function is_door_open(level) {
-							return level.is_door_open(level.layout[y][x]);
-						};
-						this.waiting.on_success = function on_success(level) {
-							self.move_x = dx;
-							self.move_y = dy;
-							self.stop_speaking();
-						};
-						this.waiting.on_failure = function on_failure(level) {
-							self.move_x = 0;
-							self.move_y = 0;
+						if (this.trying_to_fix_al) {
+							var self = this;
+							this.waiting.duration = 7500;
+							this.waiting.condition = function is_door_open(level) {
+								return level.is_door_open(level.layout[y][x]);
+							};
+							this.waiting.on_success = function on_success(level) {
+								self.move_x = dx;
+								self.move_y = dy;
+								self.stop_speaking();
+							};
+							this.waiting.on_failure = function on_failure(level) {
+								self.move_x = 0;
+								self.move_y = 0;
+								
+								self.stop_speaking();
 							
-							level.layout[y][x] = 1;
-							var can_find_new_path = self.act_on_intent(level, self.intents[self.current_intent]);
-							
-							self.stop_speaking();
-							
-							if (!can_find_new_path) {
+								level.layout[y][x] = 1;
 								self.try_to_fix_al(level, x, y);
-							}
-							level.layout[y][x] = 3;
-						};
-						this.speak("Open the door AL!");
+								level.layout[y][x] = 3;
+							};
+							this.speak("Come on AL!");
+						}
+						else {
+							var self = this;
+							this.waiting.duration = 7500;
+							this.waiting.condition = function is_door_open(level) {
+								return level.is_door_open(level.layout[y][x]);
+							};
+							this.waiting.on_success = function on_success(level) {
+								self.move_x = dx;
+								self.move_y = dy;
+								self.stop_speaking();
+							};
+							this.waiting.on_failure = function on_failure(level) {
+								self.move_x = 0;
+								self.move_y = 0;
+							
+								level.layout[y][x] = 1;
+								var can_find_new_path = self.act_on_intent(level, self.intents[self.current_intent]);
+							
+								self.stop_speaking();
+							
+								if (!can_find_new_path) {
+									self.try_to_fix_al(level, x, y);
+								}
+								level.layout[y][x] = 3;
+							};
+							this.speak("Open the door AL!");
+						}
 					}
 					else {
 						this.move_x = dx;

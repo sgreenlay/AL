@@ -145,3 +145,9 @@ Hour 42
 =======
 
 Got search for computer + endgame working.
+
+=======
+Hour 43
+=======
+
+Sort of got trapping people working. There are probably some nasty bugs that remain...
