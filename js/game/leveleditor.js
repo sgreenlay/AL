@@ -35,9 +35,15 @@ function LD25Editor(level) {
 		
 		this.level.render(engine);
 		
-		var x_offset = Math.floor(engine.mouse.x / this.level.block_size) * this.level.block_size;
-		var y_offset = Math.floor(engine.mouse.y / this.level.block_size) * this.level.block_size;
+		var x = Math.floor(engine.mouse.x / this.level.block_size);
+		var y = Math.floor(engine.mouse.y / this.level.block_size);
+		
+		var x_offset = x * this.level.block_size;
+		var y_offset = y * this.level.block_size;
+		
 		var colour = (engine.mouse.is_down() ? "rgba(0, 255, 0, 0.5)" : "rgba(255, 0, 0, 0.5)")
+		
 		engine.graphics.draw_rectangle(x_offset, y_offset, this.level.block_size, this.level.block_size, colour);
+		engine.graphics.draw_speech_bubble(x_offset + this.level.block_size / 2, y_offset, x.toString() + ',' + y.toString(), 14, "rgba(100, 100, 100, 0.8)", "rgba(255, 255, 255, 0.5)", 2);
 	}
 }

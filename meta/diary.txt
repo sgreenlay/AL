@@ -101,3 +101,10 @@ Hour 23
 =======
 
 Gaming break.
+
+=======
+Hour 24
+=======
+
+Started implementing A* pathfinding for people. Realized at the end that Dijkstra's is probably better.
+Yet another waste of an hour...
