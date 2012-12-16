@@ -29,7 +29,7 @@ function GraphicsCore(context) {
 			}
 		}
 	};
-	this.draw_sprite = function draw_sprite(name, x, y, width, height) {
+	this.draw_sprite = function draw_sprite(name, x, y, width, height, alpha) {
 		var sprite;
 		if (typeof this.sprites[name] != 'undefined') {
 			sprite = this.sprites[name];
@@ -37,7 +37,13 @@ function GraphicsCore(context) {
 		else {
 			sprite = this.sprites['wtf'];
 		}
+		if (alpha && alpha < 1) {
+			this.context.globalAlpha = alpha;
+		}
 		this.context.drawImage(this.sprites.sheet, sprite.sx, sprite.sy, sprite.sw, sprite.sh, x, y, width, height);
+		if (alpha && alpha < 1) {
+			this.context.globalAlpha = 1.0;
+		}
 	}
 	this.draw_text = function draw_text(x, y, text, size, colour) {
 		this.context.lineWidth = 1;

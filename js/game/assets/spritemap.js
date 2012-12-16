@@ -308,4 +308,28 @@ function LD25Sprites() {
 		sw : 19,
 		sh : 19
 	};
+	this['computer-l'] = {
+		sx : 80,
+		sy : 20,
+		sw : 20,
+		sh : 20
+	};
+	this['computer-u'] = {
+		sx : 100,
+		sy : 20,
+		sw : 20,
+		sh : 20
+	};
+	this['computer-r'] = {
+		sx : 80,
+		sy : 140,
+		sw : 20,
+		sh : 20
+	};
+	this['computer-d'] = {
+		sx : 100,
+		sy : 140,
+		sw : 20,
+		sh : 20
+	};
 }

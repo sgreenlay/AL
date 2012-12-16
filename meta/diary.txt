@@ -133,3 +133,9 @@ Hour 28 - 40
 =======
 
 Zzzzzzz + other non-game making stuff that needed to be done.
+
+=======
+Hour 41.5
+=======
+
+Did some work on people in the editor. Added computer terminals.

@@ -4,7 +4,8 @@
  * person.js
  */
 
-function LD25Person(x, y) {
+function LD25Person(x, y, num, intents) {
+	this.number = num;
 	this.x = x;
 	this.y = y;
 	this.offset_x = 0;
@@ -19,32 +20,7 @@ function LD25Person(x, y) {
 		return false;
 	};
 	this.speed = 0.5;
-	this.intents = [
-		{
-			task : 'move',
-			destination : {
-				x : 14,
-				y : 13
-			}
-		},
-		{
-			task : 'wait',
-			duration : 5000,
-			text : 'Computering...'
-		},
-		{
-			task : 'move',
-			destination : {
-				x : 20,
-				y : 14
-			}
-		},
-		{
-			task : 'wait',
-			duration : 5000,
-			text : 'Computering...'
-		}
-	];
+	this.intents = intents;
 	this.current_intent = -1;
 	this.act_on_intent = function act_on_intent(level, intent) {
 		if (intent.task === 'move') {
@@ -81,7 +57,7 @@ function LD25Person(x, y) {
 		return true;
 	};
 	this.act_on_next_intent = function act_on_next_intent(level) {
-		if (this.intents.length > 0) {
+		if (this.intents && this.intents.length > 0) {
 			this.current_intent = (this.current_intent + 1) % this.intents.length;
 			return this.act_on_intent(level, this.intents[this.current_intent]);
 		}
@@ -200,7 +176,21 @@ function LD25Person(x, y) {
 	};
 	this.logic = function logic(engine, elapsed, level) {
 		if (this.current_intent == -1) {
-			this.act_on_next_intent(level);
+			if (!this.act_on_next_intent(level)) {
+				var self = this;
+				this.waiting.duration = Infinity;
+				this.waiting.condition = function has_intent(level) {
+					return (this.intents && this.intents.length > 0);
+				};
+				this.waiting.on_success = function on_success(level) {
+					self.stop_speaking();
+					self.act_on_next_intent(level);
+				};
+				this.waiting.on_failure = function on_failure(level) {
+					// This should never be called
+				};
+				this.speak("I need something to do...");
+			}
 		}
 		else if (this.waiting.duration > 0) {
 			if (this.waiting.condition(level)) {
@@ -233,7 +223,10 @@ function LD25Person(x, y) {
 			}
 			
 			if (this.offset_x == 0 && this.offset_y == 0) {
-				if (this.path.length == 0) {
+				if (!this.path) {
+					this.current_intent = -1;
+				}
+				else if (this.path.length == 0) {
 					this.move_x = 0;
 					this.move_y = 0;
 					this.act_on_next_intent(level);

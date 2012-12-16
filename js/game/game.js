@@ -5,7 +5,7 @@
  */
 
  function LD25 () {
-	this.mode = 'editor';
+	this.mode = 'play';
 	this.init = function init(engine) {
 		this.level = new LD25Level();
 		this.editor = new LD25Editor(this.level);
