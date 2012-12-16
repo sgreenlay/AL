@@ -48,7 +48,7 @@ function GameCore(canvas_front, canvas_back, gameContent) {
 		if (this.total_elapsed > 1000) {
 			this.total_elapsed -= 1000;
 			this.current_fps = this.fps_counter;
-			this.fps_counter = 0;
+			this.fps_counter = 1;
 		}
 		if (this.gameContent) {
 			this.gameContent.logic(this, elapsed);

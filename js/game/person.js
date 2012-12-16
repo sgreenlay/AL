@@ -476,8 +476,8 @@ function LD25Person(x, y, num, intents) {
 		}
 	};
 	this.render = function render(engine, level) {
-		var x_offset = this.x * level.block_size + this.offset_x;
-		var y_offset = this.y * level.block_size + this.offset_y;
+		var x_offset = Math.floor(this.x * level.block_size + this.offset_x);
+		var y_offset = Math.floor(this.y * level.block_size + this.offset_y);
 		engine.graphics.front.draw_sprite('person-live', x_offset, y_offset, level.block_size, level.block_size);
 		if (typeof this['speech'] != 'undefined') {
 			engine.graphics.front.draw_speech_bubble(x_offset + level.block_size / 2, y_offset, this['speech'], 14, "rgba(100, 100, 100, 1.0)", "rgba(255, 255, 255, 1.0)", 2);

@@ -151,3 +151,9 @@ Hour 43
 =======
 
 Sort of got trapping people working. There are probably some nasty bugs that remain...
+
+=======
+Hour 44.5
+=======
+
+Spent far too much time bug fixing. There is still a framerate problem...
