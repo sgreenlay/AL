@@ -54,6 +54,21 @@ function LD25Person(x, y, num, intents) {
 				this.speak(intent.say);
 			}
 		}
+		else if (intent.task === 'retry') {
+			if (this.trying_to_fix_al) {
+				if (level.is_door_open(level.layout[intent.door.y][intent.door.x]) && 
+				    this.act_on_intent(level, this.old_intents[this.old_current_intent]))
+				{
+					this.current_intent = this.old_current_intent;
+					this.intents = this.old_intents;
+					this.old_current_intent = -1;
+					this.old_intents = null;
+				}
+			}
+		}
+		else if (intent.task === 'endgame') {
+			level.game_over();
+		}
 		return true;
 	};
 	this.act_on_next_intent = function act_on_next_intent(level) {
@@ -64,9 +79,6 @@ function LD25Person(x, y, num, intents) {
 		return false;
 	};
 	this.xy_hash = function xy_hash(x, y) {
-		if (typeof x == 'undefined' || typeof y == 'undefined') {
-			console.log("bls");
-		}
 		return x.toString() + ',' + y.toString();
 	};
 	this.generate_graph = function generate_graph(level, x, y) {
@@ -109,6 +121,11 @@ function LD25Person(x, y, num, intents) {
 		return graph;
 	};
 	this.find_path = function find_path(level, x_i, y_i, x_d, y_d) {
+		return this.find_path_to_goal(level, x_i, y_i, function (x, y) {
+			return (x == x_d && y == y_d);
+		});
+	};
+	this.find_path_to_goal = function find_path_to_goal(level, x_i, y_i, goal) {
 		var graph = this.generate_graph(level, x_i, y_i);
 		
 		var distances = new Object();
@@ -130,9 +147,10 @@ function LD25Person(x, y, num, intents) {
 				}
 			}
 			
-			if (u === this.xy_hash(x_d, y_d)) {
+			var position_u = graph[u].point;
+			if (goal(position_u.x, position_u.y)) {
 				var path = new Array();
-				path.push(graph[u].point);
+				path.push(position_u);
 				while (typeof previous[u] != 'undefined') {
 					path.unshift(graph[previous[u]].point);
 					u = previous[u];
@@ -174,8 +192,83 @@ function LD25Person(x, y, num, intents) {
 	this.stop_computer = function stop_computer() {
 		delete this['compute'];
 	};
+	this.trying_to_fix_al = false;
+	this.try_to_fix_al = function try_to_stop_al(level, x, y) {
+		this.trying_to_fix_al = true;
+		
+		this.old_intents = this.intents;
+		this.old_current_intent = this.current_intent;
+		
+		this.path = this.find_path_to_goal(level, this.x, this.y, function (x, y) {
+			for (var i = 0; i < 4; i++) {
+				switch (i) {
+					case 0:
+						if (level.is_valid_coordinates(x - 1, y) && level.is_computer(level.layout[y][x - 1])) {
+							return true;
+						}
+						break;
+					case 1:
+						if (level.is_valid_coordinates(x, y - 1) && level.is_computer(level.layout[y - 1][x])) {
+							return true;
+						}
+						break;
+					case 2:
+						if (level.is_valid_coordinates(x + 1, y) && level.is_computer(level.layout[y][x + 1])) {
+							return true;
+						}
+						break;
+					case 3:
+						if (level.is_valid_coordinates(x, y + 1) && level.is_computer(level.layout[y + 1][x])) {
+							return true;
+						}
+						break;
+				}
+			}
+			return false;
+		});
+		if (this.path != null) {
+			this.current_intent = -1;
+			this.intents = [
+				{
+					task : 'wait',
+					duration : 5000,
+					text : 'door -f open'
+				},
+				{
+					task : 'retry',
+					door : {
+						x : x,
+						y : y
+					}
+				},
+				{
+					task : 'wait',
+					duration : 3000,
+					say : 'Damn it, I\'ll have to restart AL.'
+				},
+				{
+					task : 'retry',
+					door : {
+						x : x,
+						y : y
+					}
+				},
+				{
+					task : 'wait',
+					duration : 3000,
+					text : 'AL -f restart'
+				},
+				{
+					task : 'endgame'
+				}
+			];
+		}
+		else {
+			// PANIC!
+		}
+	};
 	this.logic = function logic(engine, elapsed, level) {
-		if (this.current_intent == -1) {
+		if (!this.path && this.current_intent == -1) {
 			if (!this.act_on_next_intent(level)) {
 				var self = this;
 				this.waiting.duration = Infinity;
@@ -224,7 +317,7 @@ function LD25Person(x, y, num, intents) {
 			
 			if (this.offset_x == 0 && this.offset_y == 0) {
 				if (!this.path) {
-					this.current_intent = -1;
+					this.speak("I don't have anywhere to go!");
 				}
 				else if (this.path.length == 0) {
 					this.move_x = 0;
@@ -256,10 +349,14 @@ function LD25Person(x, y, num, intents) {
 							self.move_y = 0;
 							
 							level.layout[y][x] = 1;
-							self.act_on_intent(level, self.intents[self.current_intent]);
-							level.layout[y][x] = 3;
+							var can_find_new_path = self.act_on_intent(level, self.intents[self.current_intent]);
 							
 							self.stop_speaking();
+							
+							if (!can_find_new_path) {
+								self.try_to_fix_al(level, x, y);
+							}
+							level.layout[y][x] = 3;
 						};
 						this.speak("Open the door AL!");
 					}

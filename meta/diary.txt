@@ -139,3 +139,9 @@ Hour 41.5
 =======
 
 Did some work on people in the editor. Added computer terminals.
+
+=======
+Hour 42
+=======
+
+Got search for computer + endgame working.

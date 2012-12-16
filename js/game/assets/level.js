@@ -76,14 +76,17 @@ function LD25Level() {
 		return (this.is_wall(square_value) || this.is_door(square_value));
 	};
 	this.is_wall = function is_wall(square_value) {
-		return (square_value == 1) || (square_value == 6);
+		return (square_value == 1) || this.is_computer(square_value);
 	};
 	this.is_door = function is_door(square_value) {
 		return (this.is_door_open(square_value) || this.is_door_closed(square_value));
 	};
 	this.is_floor = function is_floor(square_value) {
 		return (square_value == 2);
-	}
+	};
+	this.is_computer = function is_wall(square_value) {
+		return (square_value == 6);
+	};
 	this.is_door_open = function is_door_open(square_value) {
 		return (square_value == 4);
 	};
@@ -101,7 +104,11 @@ function LD25Level() {
 			if (this.people[p].is_at(x, y)) return this.people[p];
 		}
 		return null;
-	}
+	};
+	this.is_game_over = false;
+	this.game_over = function game_over() {
+		this.is_game_over = true;
+	};
 	this.sprite_map = function sprite_map(x, y) {
 		var l = (!this.is_valid_coordinates(x - 1, y) || !this.is_solid(this.layout[y][x - 1])) ? 'n' : 'y';
 		var u = (!this.is_valid_coordinates(x, y - 1) || !this.is_solid(this.layout[y - 1][x])) ? 'n' : 'y';
@@ -131,22 +138,24 @@ function LD25Level() {
 		var x = Math.floor(engine.mouse.x / this.block_size);
 		var y = Math.floor(engine.mouse.y / this.block_size);
 		
-		if (engine.mouse.is_down()) {
-			if (engine.mouse['down']) {
-				if (!this.person_at(x, y)) {
-					if (this.is_door_open(this.layout[y][x])) {
-						this.close_door(x, y);
+		if (!this.is_game_over) {
+			if (engine.mouse.is_down()) {
+				if (engine.mouse['down']) {
+					if (!this.person_at(x, y)) {
+						if (this.is_door_open(this.layout[y][x])) {
+							this.close_door(x, y);
+						}
+						else if (this.is_door_closed(this.layout[y][x])) {
+							this.open_door(x, y);
+						}
 					}
-					else if (this.is_door_closed(this.layout[y][x])) {
-						this.open_door(x, y);
-					}
+					engine.mouse['down'] = false;
 				}
-				engine.mouse['down'] = false;
 			}
-		}
 		
-		for (var p = 0; p < this.people.length; p++) {
-			this.people[p].logic(engine, elapsed, this);
+			for (var p = 0; p < this.people.length; p++) {
+				this.people[p].logic(engine, elapsed, this);
+			}
 		}
 	}
 	this.render = function render(engine) {
@@ -203,6 +212,9 @@ function LD25Level() {
 		}
 		for (var p = 0; p < this.people.length; p++) {
 			this.people[p].render(engine, this);
+		}
+		if (this.is_game_over) {
+			engine.graphics.draw_rectangle(0, 0, 800, 600, "rgba(17, 17, 17, 0.8)");
 		}
 	}
 	this.highlight = function highlight(engine, x, y) {
