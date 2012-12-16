@@ -114,3 +114,16 @@ Hour 25
 =======
 
 Implemented Dijkstra's pathfinding. Started working on people intents.
+
+=======
+Hour 26
+=======
+
+Exercise break.
+Got intents working.
+
+=======
+Hour 27
+=======
+
+Procrastinating.
