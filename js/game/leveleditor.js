@@ -10,6 +10,7 @@ function LD25Editor(level) {
 	this.mode = 0;
 	this.keys = [48, 49, 50, 51, 52, 53, 54, 80];
 	this.logic = function logic(engine, elapsed) {
+		this.level.background_update = true;
 		for (var k = 0; k < this.keys.length; k++) {
 			if (engine.keyboard.is_key_down(this.keys[k])) {
 				if (engine.keyboard[this.keys[k]]) {
@@ -43,9 +44,12 @@ function LD25Editor(level) {
 				this.level.layout[y][x] = this.mode - 48;
 			}
 		}
+		
+		// TODO: add intents editor...
+		
 	};
 	this.render = function render(engine) {
-		engine.graphics.draw_grid(0, 0, 800, 600, this.level.block_size, "rgba(220, 220, 220, 1.0)", "rgba(255, 255, 255, 1.0)");
+		engine.graphics.back.draw_grid(0, 0, 800, 600, this.level.block_size, "rgba(220, 220, 220, 1.0)", "rgba(255, 255, 255, 1.0)");
 		
 		this.level.render(engine);
 		
@@ -64,22 +68,22 @@ function LD25Editor(level) {
 				x_offset = person.x * this.level.block_size + person.offset_x;
 				y_offset = person.y * this.level.block_size + person.offset_y;
 			
-				engine.graphics.draw_speech_bubble(x_offset + this.level.block_size / 2, y_offset, 'Person ' + person.number.toString(), 14, "rgba(100, 100, 100, 0.8)", "rgba(255, 255, 255, 0.5)", 2);
+				engine.graphics.front.draw_speech_bubble(x_offset + this.level.block_size / 2, y_offset, 'Person ' + person.number.toString(), 14, "rgba(100, 100, 100, 0.8)", "rgba(255, 255, 255, 0.5)", 2);
 			}
 			else {
 				if (this.level.is_floor(this.level.layout[y][x])) {
-					engine.graphics.draw_sprite('person-live', x_offset, y_offset, this.level.block_size, this.level.block_size, 0.5);
+					engine.graphics.front.draw_sprite('person-live', x_offset, y_offset, this.level.block_size, this.level.block_size, 0.5);
 				}
 				else {
-					engine.graphics.draw_sprite('person-dead', x_offset, y_offset, this.level.block_size, this.level.block_size, 0.5);
+					engine.graphics.front.draw_sprite('person-dead', x_offset, y_offset, this.level.block_size, this.level.block_size, 0.5);
 				}
 			}
 		}
 		else {
 			var colour = (engine.mouse.is_down() ? "rgba(0, 255, 0, 0.5)" : "rgba(255, 0, 0, 0.5)");
 			
-			engine.graphics.draw_rectangle(x_offset, y_offset, this.level.block_size, this.level.block_size, colour);
-			engine.graphics.draw_speech_bubble(x_offset + this.level.block_size / 2, y_offset, x.toString() + ',' + y.toString(), 14, "rgba(100, 100, 100, 0.8)", "rgba(255, 255, 255, 0.5)", 2);
+			engine.graphics.front.draw_rectangle(x_offset, y_offset, this.level.block_size, this.level.block_size, colour);
+			engine.graphics.front.draw_speech_bubble(x_offset + this.level.block_size / 2, y_offset, x.toString() + ',' + y.toString(), 14, "rgba(100, 100, 100, 0.8)", "rgba(255, 255, 255, 0.5)", 2);
 		}
 	}
 }

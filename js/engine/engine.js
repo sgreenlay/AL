@@ -4,11 +4,13 @@
  * engine.js
  */
 
-function GameCore(canvas, gameContent) {
-	this.canvas = canvas;
-	this.context = canvas.getContext('2d');
+function GameCore(canvas_front, canvas_back, gameContent) {
 	this.gameContent = gameContent;
-	this.graphics = new GraphicsCore(this.context);
+	this.canvas = canvas_front;
+	this.graphics = {
+		front: new GraphicsCore(canvas_front.getContext('2d')),
+		back: new GraphicsCore(canvas_back.getContext('2d'))
+	};
 	this.desired_fps = 60;
 	this.total_elapsed = 0;
 	this.current_fps = 0;
@@ -31,7 +33,7 @@ function GameCore(canvas, gameContent) {
 			this.gameContent.render(this);
 		}
 		if (this.should_render_fps) {
-			this.graphics.draw_text(4, 20, this.current_fps.toString() + " fps", 22, "#FAE309");
+			this.graphics.front.draw_text(4, 20, this.current_fps.toString() + " fps", 22, "#FAE309");
 		}
 	};
 	this.logic = function logic(elapsed) {
@@ -52,26 +54,29 @@ function GameCore(canvas, gameContent) {
 			this.gameContent.logic(this, elapsed);
 		}
 	};
+	this.is_updating = false;
 	this.update = function update() {
+		this.is_updating = true;
 		var last_update = this.last_update;
 		this.last_update = (new Date).getTime();
 		this.logic((this.last_update - last_update));
 		this.render();
+		this.is_updating = false;
 	};
 	this.run = function run() {
 		var self = this;
 		if (this.gameContent) {
 			this.gameContent.init(this);
 		}
-		canvas.onselectstart = function () {
+		this.canvas.onselectstart = function () {
 			return false;
 		}
-		canvas.onmousemove = function(e) {
+		this.canvas.onmousemove = function(e) {
 		    self.mouse.x = e.layerX;
 		    self.mouse.y = e.layerY;
 			e.cancelBubble = true;
 		};
-		canvas.onmousedown = function(e) {
+		this.canvas.onmousedown = function(e) {
 		    self.mouse.x = e.layerX;
 		    self.mouse.y = e.layerY;
 			if (typeof self.mouse['down'] == 'undefined') {
@@ -79,7 +84,7 @@ function GameCore(canvas, gameContent) {
 			}
 			e.cancelBubble = true;
 		};
-		canvas.onmouseup = function(e) {
+		this.canvas.onmouseup = function(e) {
 		    self.mouse.x = e.layerX;
 		    self.mouse.y = e.layerY;
 			if (typeof self.mouse['down'] != 'undefined') {
@@ -102,7 +107,9 @@ function GameCore(canvas, gameContent) {
 		};
 		this.last_update = (new Date).getTime();
 		this.interval = setInterval(function () {
-			self.update();
+			if (!this.is_updating) {
+				self.update();
+			}
 		}, 1000 / this.desired_fps);
 	};
 	this.stop = function stop() {

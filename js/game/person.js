@@ -19,10 +19,13 @@ function LD25Person(x, y, num, intents) {
 		}
 		return false;
 	};
-	this.speed = 0.5;
+	this.speed = 1.0;
 	this.intents = intents;
 	this.current_intent = -1;
 	this.act_on_intent = function act_on_intent(level, intent) {
+		if (typeof intent.preaction != 'undefined') {
+			intent.preaction(level);
+		}
 		if (intent.task === 'move') {
 			this.path = this.find_path(level, this.x, this.y, intent.destination.x, intent.destination.y);
 			if (this.path == null) {
@@ -243,6 +246,8 @@ function LD25Person(x, y, num, intents) {
 				var path_to_computer = this.path;
 				var can_act_on_intent = this.act_on_intent(level, this.old_intents[this.old_current_intent]);
 				
+				this.stop_speaking();
+				
 				for (var i = 0; i < this.intents[1].doors.length; i++) {
 					if (level.layout[this.intents[1].doors[i].y][this.intents[1].doors[i].x] == 1) {
 						level.layout[this.intents[1].doors[i].y][this.intents[1].doors[i].x] = 3;
@@ -263,8 +268,11 @@ function LD25Person(x, y, num, intents) {
 					x : x,
 					y : y
 				});
+				
+				this.speak('Stupid computer...');
 			}
 			else {
+				var self = this;
 				this.trying_to_fix_al = true;
 		
 				this.old_intents = this.intents;
@@ -276,7 +284,10 @@ function LD25Person(x, y, num, intents) {
 					{
 						task : 'wait',
 						duration : 5000,
-						text : 'door -f open'
+						text : 'door -f open',
+						preaction : function preaction(level) {
+							self.stop_speaking();
+						}
 					},
 					{
 						task : 'retry',
@@ -299,6 +310,8 @@ function LD25Person(x, y, num, intents) {
 						task : 'endgame'
 					}
 				];
+				
+				this.speak('Stupid computer...');
 			}
 		}
 		else {
@@ -365,14 +378,19 @@ function LD25Person(x, y, num, intents) {
 			}
 		}
 		else {
-			this.offset_x += this.move_x * (level.block_size * this.speed) * (elapsed / 1000);
-			this.offset_y += this.move_y * (level.block_size * this.speed) * (elapsed / 1000);
-		
-			if (Math.abs(this.offset_x) >= level.block_size) {
+			this.offset_x += this.move_x * (level.block_size * this.speed) * (elapsed / 1000.0);
+			this.offset_y += this.move_y * (level.block_size * this.speed) * (elapsed / 1000.0);
+			
+			var overrun_x = Math.abs(this.offset_x);
+			var overrun_y = Math.abs(this.offset_y);
+			
+			if (overrun_x >= level.block_size) {
+				overrun_x -= level.block_size;
 				this.offset_x = 0;
 				this.x += this.move_x;
 			}
-			if (Math.abs(this.offset_y) >= level.block_size) {
+			if (overrun_y >= level.block_size) {
+				overrun_y -= level.block_size;
 				this.offset_y = 0;
 				this.y += this.move_y;
 			}
@@ -449,7 +467,9 @@ function LD25Person(x, y, num, intents) {
 					}
 					else {
 						this.move_x = dx;
+						this.offset_x = overrun_x * this.move_x;
 						this.move_y = dy;
+						this.offset_y = overrun_y * this.move_y;
 					}
 				}
 			}
@@ -458,12 +478,12 @@ function LD25Person(x, y, num, intents) {
 	this.render = function render(engine, level) {
 		var x_offset = this.x * level.block_size + this.offset_x;
 		var y_offset = this.y * level.block_size + this.offset_y;
-		engine.graphics.draw_sprite('person-live', x_offset, y_offset, level.block_size, level.block_size);
+		engine.graphics.front.draw_sprite('person-live', x_offset, y_offset, level.block_size, level.block_size);
 		if (typeof this['speech'] != 'undefined') {
-			engine.graphics.draw_speech_bubble(x_offset + level.block_size / 2, y_offset, this['speech'], 14, "rgba(100, 100, 100, 1.0)", "rgba(255, 255, 255, 1.0)", 2);
+			engine.graphics.front.draw_speech_bubble(x_offset + level.block_size / 2, y_offset, this['speech'], 14, "rgba(100, 100, 100, 1.0)", "rgba(255, 255, 255, 1.0)", 2);
 		}
 		if (typeof this['compute'] != 'undefined') {
-			engine.graphics.draw_speech_bubble(x_offset + level.block_size / 2, y_offset, this['compute'], 14, "rgba(105, 201, 21, 1.0)", "rgba(0, 0, 0, 1.0)", 2);
+			engine.graphics.front.draw_speech_bubble(x_offset + level.block_size / 2, y_offset, this['compute'], 14, "rgba(105, 201, 21, 1.0)", "rgba(0, 0, 0, 1.0)", 2);
 		}
 	};
 };
