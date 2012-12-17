@@ -19,3 +19,5 @@ AL is a game built in 24h (had to sleep + eat + get other chores done) for the 2
 The engine + game was built from scratch and as a result I ran out of time. The submitted game contained only a single (boring) tutorial-esque level. However, the (also incomplete) level editor is included (accessed by pressing 'e' while playing).
 
 You can see the submission here: http://www.ludumdare.com/compo/ludum-dare-25/?action=preview&uid=18986
+
+**The code is very messy and hacked together. Maybe someday I will come back and clean it up.**
