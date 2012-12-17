@@ -82,29 +82,47 @@ function LD25Level() {
 		return (this.is_door_open(square_value) || this.is_door_closed(square_value));
 	};
 	this.is_floor = function is_floor(square_value) {
-		return (square_value == 2);
+		return ((square_value == 2) || (square_value == 8));
 	};
 	this.is_computer = function is_wall(square_value) {
 		return (square_value == 6);
 	};
 	this.is_door_open = function is_door_open(square_value) {
-		return (square_value == 4);
+		return ((square_value == 4) || (square_value == 7));
 	};
 	this.is_door_closed = function is_door_closed(square_value) {
 		return (square_value == 3);
 	};
 	this.is_walkable = function is_walkable(square_value) {
 		return (this.is_door(square_value) || this.is_floor(square_value));
-	}
+	};
+	this.is_space = function is_space(square_value) {
+		return ((square_value == 0) || (square_value == 5));
+	};
+	this.is_vacuum = function is_vacuum(square_value) {
+		return (this.is_space(square_value) || (square_value == 7) || (square_value == 8));
+	};
+	this.mark_vacuum = function mark_vacuum(x, y) {
+		if (this.layout[y][x] == 4) {
+			this.layout[y][x] = 7;
+		}
+		else if (this.layout[y][x] == 2) {
+			this.layout[y][x] = 8;
+		}
+	};
+	this.unmark_vacuum = function unmark_vacuum(x, y) {
+		if (this.layout[y][x] == 7) {
+			this.layout[y][x] = 4;
+		}
+		else if (this.layout[y][x] == 8) {
+			this.layout[y][x] = 2;
+		}
+	};
 	this.open_door = function open_door(x, y) {
 		this.layout[y][x] = 4;
-		
-		// TODO
 	};
 	this.close_door = function close_door(x, y) {
 		this.layout[y][x] = 3;
-		
-		// TODO
 	};
 	this.person_at = function person_at(x, y) {
 		for (var p = 0; p < this.people.length; p++) {
@@ -141,6 +159,65 @@ function LD25Level() {
 		
 		return l + u + r + d;
 	};
+	this.check_seals = function check_seals() {
+		var squares_touched = generate_array(this.w, this.h, false);
+		for (var y = 0; y < this.h; y++) {
+			for (var x = 0; x < this.w; x++) {
+				if (squares_touched[y][x] == false) {
+					if ((this.is_floor(this.layout[y][x]) || this.is_door_open(this.layout[y][x]))) {
+						var graph = generate_graph(this, x, y, function (level, x, y) {
+							return (level.is_floor(level.layout[y][x]) || level.is_door_open(level.layout[y][x]));
+						});
+						var is_vacuum = false;
+						for (v in graph) {
+							var x_n = graph[v].point.x;
+							var y_n = graph[v].point.y;
+							for (var i = 0; i < 4; i++) {
+								switch (i) {
+									case 0:
+										if (!is_vacuum && this.is_valid_coordinates(x_n - 1, y_n) && this.is_space(this.layout[y_n][x_n - 1])) {
+											is_vacuum = true;
+										}
+										break;
+									case 1:
+										if (!is_vacuum && this.is_valid_coordinates(x_n, y_n - 1) && this.is_space(this.layout[y_n - 1][x_n])) {
+											is_vacuum = true;
+										}
+										break;
+									case 2:
+										if (!is_vacuum && this.is_valid_coordinates(x_n + 1, y_n) && this.is_space(this.layout[y_n][x_n + 1])) {
+											is_vacuum = true;
+										}
+										break;
+									case 3:
+										if (!is_vacuum && this.is_valid_coordinates(x_n, y_n + 1) && this.is_space(this.layout[y_n + 1][x_n])) {
+											is_vacuum = true;
+										}
+										break;
+								}
+							}
+						}
+						for (v in graph) {
+							var x_n = graph[v].point.x;
+							var y_n = graph[v].point.y;
+							
+							squares_touched[y_n][x_n] = true;
+							
+							if (is_vacuum) {
+								this.mark_vacuum(x_n, y_n);
+							}
+							else {
+								this.unmark_vacuum(x_n, y_n);
+							}
+						}
+					}
+					else {
+						squares_touched[y][x] = true;
+					}
+				}
+			}
+		}
+	}
 	this.logic = function logic(engine, elapsed) {
 		var x = Math.floor(engine.mouse.x / this.block_size);
 		var y = Math.floor(engine.mouse.y / this.block_size);
@@ -160,6 +237,10 @@ function LD25Level() {
 					}
 					engine.mouse['down'] = false;
 				}
+			}
+			
+			if (this.background_update) {
+				this.check_seals();
 			}
 		
 			for (var p = 0; p < this.people.length; p++) {
@@ -217,6 +298,12 @@ function LD25Level() {
 								}
 							}
 						}
+					}
+					else if (this.layout[y][x] == 7) {
+						engine.graphics.back.draw_sprite('vacuum-door-' + this.map_sprites(x, y), x_offset, y_offset, this.block_size, this.block_size);
+					}
+					else if (this.layout[y][x] == 8) {
+						engine.graphics.back.draw_sprite('vacuum-floor', x_offset, y_offset, this.block_size, this.block_size);
 					}
 				}
 			}

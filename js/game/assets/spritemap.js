@@ -38,6 +38,24 @@ function LD25Sprites() {
 		sw : 20,
 		sh : 20
 	};
+	this['vacuum-floor'] = {
+		sx : 0,
+		sy : 180,
+		sw : 20,
+		sh : 20
+	};
+	this['vacuum-door-nyny'] = {
+		sx : 20,
+		sy : 180,
+		sw : 20,
+		sh : 20
+	};
+	this['vacuum-door-ynyn'] = {
+		sx : 40,
+		sy : 180,
+		sw : 20,
+		sh : 20
+	};
 	this['close-door-nyny'] = {
 		sx : 40,
 		sy : 0,

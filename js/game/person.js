@@ -209,7 +209,7 @@ function LD25Person(x, y, num, intents) {
 					{
 						task : 'wait',
 						duration : 3000,
-						text : 'AL -f restart'
+						text : 'killall AL'
 					},
 					{
 						task : 'endgame'

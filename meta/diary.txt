@@ -164,4 +164,10 @@ Hour 45
 =======
 
 Refactored a bit, started working on airlocks.
-NEED TO GET SOME GAMEPLAY!
+Food break.
+
+=======
+Hour 45.5
+=======
+
+Got airlocks working.
