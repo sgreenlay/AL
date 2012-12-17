@@ -5,6 +5,9 @@
  */
 
 function LD25Level() {
+	
+	// TODO: load this from json to allow for multiple levels
+	
 	this.layout = [
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -131,8 +134,10 @@ function LD25Level() {
 		return null;
 	};
 	this.is_game_over = false;
-	this.game_over = function game_over() {
+	this.game_result = false;
+	this.game_over = function game_over(result) {
 		this.is_game_over = true;
+		this.game_result = result;
 	};
 	this.map_sprites = function map_sprites(x, y) {
 		var l = (!this.is_valid_coordinates(x - 1, y) || !this.is_solid(this.layout[y][x - 1])) ? 'n' : 'y';
@@ -242,9 +247,17 @@ function LD25Level() {
 			if (this.background_update) {
 				this.check_seals();
 			}
-		
+			
+			var live_count = 0;
 			for (var p = 0; p < this.people.length; p++) {
-				this.people[p].logic(engine, elapsed, this);
+				if (this.people[p].life > 0) {
+					this.people[p].logic(engine, elapsed, this);
+					live_count++;
+				}
+			}
+			
+			if (live_count == 0) {
+				this.game_over(true);
 			}
 		}
 	}
@@ -314,6 +327,12 @@ function LD25Level() {
 		}
 		if (this.is_game_over) {
 			engine.graphics.front.draw_rectangle(0, 0, 800, 600, "rgba(17, 17, 17, 0.8)");
+			if (this.game_result) {
+				engine.graphics.front.draw_title(400, 300, 'You have won.', 56, "rgba(0, 255, 0, 1.0)");
+			}
+			else {
+				engine.graphics.front.draw_title(400, 300, 'You have lost.', 56, "rgba(255, 0, 0, 1.0)");
+			}
 		}
 	}
 	this.highlight = function highlight(engine, x, y) {

@@ -51,6 +51,16 @@ function GraphicsCore(context) {
 		this.context.font = size.toString() + "px Strait";
 		this.context.fillText(text, x, y);
 	}
+	this.draw_title = function draw_title(x, y, text, size, colour) {
+		this.context.lineWidth = 1;
+		this.context.fillStyle = colour;
+		this.context.textBaseline = 'bottom';
+		this.context.font = size.toString() + "px Strait";
+		var metrics = this.context.measureText(text);
+		var width = metrics.width;
+		var height = size;
+		this.context.fillText(text, x - (width / 2), y - (height / 2) + (size / 2));
+	}
 	this.draw_speech_bubble = function draw_speech_bubble(x, y, text, size, on_colour, off_colour, padding) {
 		this.context.lineWidth = 1;
 		this.context.fillStyle = on_colour;

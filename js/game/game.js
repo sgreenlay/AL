@@ -15,7 +15,7 @@
 		this.level.background_update = true;
 	}
 	this.logic = function logic(engine, elapsed) {
-		if (engine.keyboard.is_key_down(69)) { // 'E'
+		if (!this.level.is_game_over && engine.keyboard.is_key_down(69)) { // 'E'
 			if (engine.keyboard[69]) {
 				if (this.mode === 'editor') {
 					this.mode = 'play';

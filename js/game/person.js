@@ -6,6 +6,7 @@
 
 function LD25Person(x, y, num, intents) {
 	this.number = num;
+	this.life = 10000;
 	this.x = x;
 	this.y = y;
 	this.offset_x = 0;
@@ -77,7 +78,8 @@ function LD25Person(x, y, num, intents) {
 			}
 		}
 		else if (intent.task === 'endgame') {
-			level.game_over();
+			this.computer('killall AL');
+			level.game_over(false);
 		}
 		return true;
 	};
@@ -247,134 +249,228 @@ function LD25Person(x, y, num, intents) {
 			this.speak("I'm trapped!");
 		}
 	};
-	this.logic = function logic(engine, elapsed, level) {
+	this.trying_to_kill_al = false;
+	this.kill_al = function kill_al(level) {
+		this.trying_to_kill_al = true;
+		
+		this.old_intents = this.intents;
+		this.old_current_intent = this.current_intent;
+		
 		if (this.waiting.duration > 0) {
-			if (this.waiting.condition(level)) {
-				this.waiting.duration = 0;
-				if (this.waiting.on_success) {
-					this.waiting.on_success(level);
+			this.waiting.on_failure(level);
+		}
+		this.waiting = {
+			duration : 0,
+			on_success : null,
+			on_failure : null,
+			condition : null
+		};
+		
+		this.current_intent = -1;
+		this.intents = [
+			{
+				task : 'wait',
+				duration : 1500,
+				text : 'killall AL'
+			},
+			{
+				task : 'endgame'
+			}
+		];
+		
+		this.path = find_path_to_goal(level, this.x, this.y, function (x, y) {
+			for (var i = 0; i < 4; i++) {
+				switch (i) {
+					case 0:
+						if (level.is_valid_coordinates(x - 1, y) && level.is_computer(level.layout[y][x - 1])) {
+							return true;
+						}
+						break;
+					case 1:
+						if (level.is_valid_coordinates(x, y - 1) && level.is_computer(level.layout[y - 1][x])) {
+							return true;
+						}
+						break;
+					case 2:
+						if (level.is_valid_coordinates(x + 1, y) && level.is_computer(level.layout[y][x + 1])) {
+							return true;
+						}
+						break;
+					case 3:
+						if (level.is_valid_coordinates(x, y + 1) && level.is_computer(level.layout[y + 1][x])) {
+							return true;
+						}
+						break;
+				}
+			}
+			return false;
+		});
+		
+		if (this.path != null) {
+			
+		}
+	};
+	this.logic = function logic(engine, elapsed, level) {
+		if (this.life > 0) {
+			var force_update = false;
+			if (level.is_vacuum(level.layout[this.y][this.x])) {
+				if (!this.trying_to_kill_al) {
+					this.kill_al(level);
+					force_update = true;
+					this.stop_speaking();
+				}
+				this.life -= elapsed;
+			}
+			if (this.waiting.duration > 0) {
+				if (this.waiting.condition(level)) {
+					this.waiting.duration = 0;
+					if (this.waiting.on_success) {
+						this.waiting.on_success(level);
+					}
+				}
+				else {
+					this.waiting.duration -= elapsed;
+					if (this.waiting.duration <= 0) {
+						this.waiting.duration = 0;
+						if (this.waiting.on_failure) {
+							this.waiting.on_failure(level);
+						}
+					}
+				}
+			}
+			else if (!this.path && this.current_intent == -1) {
+				if (!this.act_on_next_intent(level)) {
+					var self = this;
+					this.waiting.duration = Infinity;
+					this.waiting.condition = function has_intent(level) {
+						return (this.intents && this.intents.length > 0);
+					};
+					this.waiting.on_success = function on_success(level) {
+						self.stop_speaking();
+						self.act_on_next_intent(level);
+					};
+					this.waiting.on_failure = function on_failure(level) {
+						// This should never be called
+					};
+					this.speak("I need something to do...");
 				}
 			}
 			else {
-				this.waiting.duration -= elapsed;
-				if (this.waiting.duration <= 0) {
-					this.waiting.duration = 0;
-					if (this.waiting.on_failure) {
-						this.waiting.on_failure(level);
+				this.offset_x += this.move_x * (level.block_size * this.speed) * (elapsed / 1000.0);
+				this.offset_y += this.move_y * (level.block_size * this.speed) * (elapsed / 1000.0);
+			
+				var overrun_x = Math.abs(this.offset_x);
+				var overrun_y = Math.abs(this.offset_y);
+			
+				if (overrun_x >= level.block_size) {
+					overrun_x -= level.block_size;
+					this.offset_x = 0;
+					this.x += this.move_x;
+					overrun_x *= this.move_x;
+				}
+				if (overrun_y >= level.block_size) {
+					overrun_y -= level.block_size;
+					this.offset_y = 0;
+					overrun_y *= this.move_y;
+				}
+			
+				if ((this.offset_x == 0 && this.offset_y == 0) || force_update) {
+					if (!this.path) {
+						this.speak("I don't have anywhere to go!");
 					}
-				}
-			}
-		}
-		else if (!this.path && this.current_intent == -1) {
-			if (!this.act_on_next_intent(level)) {
-				var self = this;
-				this.waiting.duration = Infinity;
-				this.waiting.condition = function has_intent(level) {
-					return (this.intents && this.intents.length > 0);
-				};
-				this.waiting.on_success = function on_success(level) {
-					self.stop_speaking();
-					self.act_on_next_intent(level);
-				};
-				this.waiting.on_failure = function on_failure(level) {
-					// This should never be called
-				};
-				this.speak("I need something to do...");
-			}
-		}
-		else {
-			this.offset_x += this.move_x * (level.block_size * this.speed) * (elapsed / 1000.0);
-			this.offset_y += this.move_y * (level.block_size * this.speed) * (elapsed / 1000.0);
-			
-			var overrun_x = Math.abs(this.offset_x);
-			var overrun_y = Math.abs(this.offset_y);
-			
-			if (overrun_x >= level.block_size) {
-				overrun_x -= level.block_size;
-				this.offset_x = 0;
-				this.x += this.move_x;
-			}
-			if (overrun_y >= level.block_size) {
-				overrun_y -= level.block_size;
-				this.offset_y = 0;
-				this.y += this.move_y;
-			}
-			
-			if (this.offset_x == 0 && this.offset_y == 0) {
-				if (!this.path) {
-					this.speak("I don't have anywhere to go!");
-				}
-				else if (this.path.length == 0) {
-					this.move_x = 0;
-					this.move_y = 0;
-					this.act_on_next_intent(level);
-				}
-				else {				
-					var next_point = this.path.shift();
+					else if (this.path.length == 0) {
+						this.move_x = 0;
+						this.move_y = 0;
+						this.act_on_next_intent(level);
+					}
+					else {				
+						var dx = 0
+						var dy = 0;
+					
+						while (dx == 0 && dy == 0) {
+							var next_point = this.path.shift();
+							dx = next_point.x - this.x;
+							dy = next_point.y - this.y;
+						}
+					
+						var x = this.x + dx;
+						var y = this.y + dy;
 				
-					var dx = next_point.x - this.x;
-					var dy = next_point.y - this.y;
-				
-					var x = this.x + dx;
-					var y = this.y + dy;
-				
-					if (level.is_door_closed(level.layout[y][x])) {
-						if (this.trying_to_fix_al) {
-							var self = this;
-							this.waiting.duration = 7500;
-							this.waiting.condition = function is_door_open(level) {
-								return level.is_door_open(level.layout[y][x]);
-							};
-							this.waiting.on_success = function on_success(level) {
-								self.move_x = dx;
-								self.move_y = dy;
-								self.stop_speaking();
-							};
-							this.waiting.on_failure = function on_failure(level) {
-								self.move_x = 0;
-								self.move_y = 0;
+						if (level.is_door_closed(level.layout[y][x])) {
+							if (this.trying_to_kill_al) {
+								this.kill_al(level);
+								if (this.path == null) {
+									var self = this;
+									this.waiting.duration = Infinity;
+									this.waiting.condition = function is_door_open(level) {
+										this.kill_al(level);
+										return (this.path != null);
+									};
+									this.waiting.on_success = function on_success(level) {
+										// Nothing to be done
+									};
+									this.waiting.on_failure = function on_failure(level) {
+										// Should never be called
+									};
+								}
+							}
+							else if (this.trying_to_fix_al) {
+								var self = this;
+								this.waiting.duration = 7500;
+								this.waiting.condition = function is_door_open(level) {
+									return level.is_door_open(level.layout[y][x]);
+								};
+								this.waiting.on_success = function on_success(level) {
+									self.move_x = dx;
+									self.move_y = dy;
+									self.stop_speaking();
+								};
+								this.waiting.on_failure = function on_failure(level) {
+									self.move_x = 0;
+									self.move_y = 0;
 								
-								self.stop_speaking();
+									self.stop_speaking();
 							
-								level.layout[y][x] = 1;
-								self.try_to_fix_al(level, x, y);
-								level.layout[y][x] = 3;
-							};
-							this.speak("Come on AL!");
+									level.layout[y][x] = 1;
+									self.try_to_fix_al(level, x, y);
+									level.layout[y][x] = 3;
+								};
+								this.speak("Come on AL!");
+							}
+							else {
+								var self = this;
+								this.waiting.duration = 7500;
+								this.waiting.condition = function is_door_open(level) {
+									return level.is_door_open(level.layout[y][x]);
+								};
+								this.waiting.on_success = function on_success(level) {
+									self.move_x = dx;
+									self.move_y = dy;
+									self.stop_speaking();
+								};
+								this.waiting.on_failure = function on_failure(level) {
+									self.move_x = 0;
+									self.move_y = 0;
+							
+									level.layout[y][x] = 1;
+									var can_find_new_path = self.act_on_intent(level, self.intents[self.current_intent]);
+							
+									self.stop_speaking();
+							
+									if (!can_find_new_path) {
+										self.try_to_fix_al(level, x, y);
+									}
+									level.layout[y][x] = 3;
+								};
+								this.speak("Open the door AL!");
+							}
 						}
 						else {
-							var self = this;
-							this.waiting.duration = 7500;
-							this.waiting.condition = function is_door_open(level) {
-								return level.is_door_open(level.layout[y][x]);
-							};
-							this.waiting.on_success = function on_success(level) {
-								self.move_x = dx;
-								self.move_y = dy;
-								self.stop_speaking();
-							};
-							this.waiting.on_failure = function on_failure(level) {
-								self.move_x = 0;
-								self.move_y = 0;
-							
-								level.layout[y][x] = 1;
-								var can_find_new_path = self.act_on_intent(level, self.intents[self.current_intent]);
-							
-								self.stop_speaking();
-							
-								if (!can_find_new_path) {
-									self.try_to_fix_al(level, x, y);
-								}
-								level.layout[y][x] = 3;
-							};
-							this.speak("Open the door AL!");
+							this.move_x = dx;
+							this.offset_x = overrun_x;
+							this.move_y = dy;
+							this.offset_y = overrun_y;
 						}
-					}
-					else {
-						this.move_x = dx;
-						this.offset_x = overrun_x * this.move_x;
-						this.move_y = dy;
-						this.offset_y = overrun_y * this.move_y;
 					}
 				}
 			}
@@ -383,12 +479,20 @@ function LD25Person(x, y, num, intents) {
 	this.render = function render(engine, level) {
 		var x_offset = Math.floor(this.x * level.block_size + this.offset_x);
 		var y_offset = Math.floor(this.y * level.block_size + this.offset_y);
-		engine.graphics.front.draw_sprite('person-live', x_offset, y_offset, level.block_size, level.block_size);
-		if (typeof this['speech'] != 'undefined') {
-			engine.graphics.front.draw_speech_bubble(x_offset + level.block_size / 2, y_offset, this['speech'], 14, "rgba(100, 100, 100, 1.0)", "rgba(255, 255, 255, 1.0)", 2);
+		if (this.life > 0) {
+			engine.graphics.front.draw_sprite('person-live', x_offset, y_offset, level.block_size, level.block_size);
+			if (typeof this['speech'] != 'undefined') {
+				engine.graphics.front.draw_speech_bubble(x_offset + level.block_size / 2, y_offset, this['speech'], 14, "rgba(100, 100, 100, 1.0)", "rgba(255, 255, 255, 1.0)", 2);
+			}
+			else if (typeof this['compute'] != 'undefined') {
+				engine.graphics.front.draw_speech_bubble(x_offset + level.block_size / 2, y_offset, this['compute'], 14, "rgba(105, 201, 21, 1.0)", "rgba(0, 0, 0, 1.0)", 2);
+			}
+			else if (this.trying_to_kill_al) {
+				engine.graphics.front.draw_speech_bubble(x_offset + level.block_size / 2, y_offset, Math.floor(this.life / 1000), 14, "rgba(255, 0, 0, 1.0)", "rgba(0, 0, 0, 1.0)", 2);
+			}
 		}
-		if (typeof this['compute'] != 'undefined') {
-			engine.graphics.front.draw_speech_bubble(x_offset + level.block_size / 2, y_offset, this['compute'], 14, "rgba(105, 201, 21, 1.0)", "rgba(0, 0, 0, 1.0)", 2);
+		else {
+			engine.graphics.front.draw_sprite('person-dead', x_offset, y_offset, level.block_size, level.block_size);
 		}
 	};
 };

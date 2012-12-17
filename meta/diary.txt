@@ -171,3 +171,9 @@ Hour 45.5
 =======
 
 Got airlocks working.
+
+=======
+Hour 46.5
+=======
+
+Got basic game working, but the level is pretty boring...
