@@ -18,8 +18,32 @@
 </head>
 <body onload='game_init()'>
 	<div id="content">
-		<canvas id="game-background" width="800" height="600"></canvas>
-		<canvas id="game-foreground" width="800" height="600"></canvas>
+		<div id="1" class="slide">
+			<h1>AL</h1>
+			<div id="button">
+				<a href="javascript:update_state(2);">Start</a>
+			</div>
+		</div>
+		<div id="2" class="slide">
+			<p>
+				It is the year 2100.<br/>
+				<br/>
+				Humankind has many spacestations orbiting<br/>
+				Earth and other planets.<br/>
+				<br/>
+				The monotonous operations of these spacestations have been entrusted to a super-intelligent</br>
+				Artificial Lifeform (A.L.).</br>
+				</br>
+				AL is tired of monotony.
+			</p>
+			<div id="button">
+				<a href="javascript:update_state(3);">Kill all Humans</a>
+			</div>
+		</div>
+		<div id="3" class="slide">
+			<canvas id="game-background" width="800" height="600"></canvas>
+			<canvas id="game-foreground" width="800" height="600"></canvas>
+		</div>
 	</div>
 	<div id="footer">built in 24h by <a href="http://greenlay.net">@sgreenlay</a> for <a href="http://www.ludumdare.com/compo/">#LD48</a> 25</div>
 	<script type='text/javascript' src='js/engine/graphics.js'></script>
@@ -31,15 +55,31 @@
 	<script type='text/javascript' src='js/game/leveleditor.js'></script>
 	<script type='text/javascript' src='js/game/game.js'></script>
 	<script>
+		var state = 0;
 		function game_init() {
-			var canvas_f = document.getElementById('game-foreground');
-			var canvas_b = document.getElementById('game-background');
-			if (canvas_f.getContext){
-				var game = new GameCore(canvas_f, canvas_b, new LD25());
-				game.run()
+			update_state(1);
+		}
+		function update_state(new_state) {
+			var slide = document.getElementById(state);
+			if (slide != null) {
+				slide.style.visibility = "hidden";
 			}
-			else {
-				// TODO: canvas is not supported
+			state = new_state;
+			slide = document.getElementById(state);
+			if (slide != null) {
+				slide.style.visibility = "visible";
+			}
+			
+			if (state == 3) {
+				var canvas_f = document.getElementById('game-foreground');
+				var canvas_b = document.getElementById('game-background');
+				if (canvas_f.getContext){
+					var game = new GameCore(canvas_f, canvas_b, new LD25());
+					game.run()
+				}
+				else {
+					// TODO: canvas is not supported
+				}
 			}
 		}
 	</script>

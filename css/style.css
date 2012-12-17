@@ -24,7 +24,56 @@ body {
 	/* background: #cccccc; */
 }
 
-#content canvas {
+#content .slide {
+	color: #888;
+	position : absolute;
+	width: 100%;
+	height: 100%;
+	visibility: hidden;
+}
+
+#content .slide h1 {
+	position : absolute;
+	color : #FAE309;
+	font-size : 256px;
+	text-align : center;
+	vertical-align : middle;
+	width : 100%;
+	height : 256px;
+	top: 50%;
+	margin-top: -128px;
+}
+
+#content .slide #button {
+	position : absolute;
+	bottom : 20%;
+	width : 100%;
+	text-align : center;
+}
+
+#content .slide #button a {
+	font-size : 36px;
+	background : #FAE309;
+	padding : 5px 10px;
+	text-decoration: none;
+	color : black;
+}
+
+#content .slide #button a:hover {
+	background : white;
+	color : black;
+}
+
+#content .slide p {
+	position : absolute;
+	color : #FAE309;
+	font-size : 36px;
+	text-align : center;
+	vertical-align : middle;
+	width : 100%;
+}
+
+#content .slide canvas {
 	position : absolute;
 	width: 100%;
 	height: 100%;

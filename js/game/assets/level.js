@@ -329,6 +329,7 @@ function LD25Level() {
 			engine.graphics.front.draw_rectangle(0, 0, 800, 600, "rgba(17, 17, 17, 0.8)");
 			if (this.game_result) {
 				engine.graphics.front.draw_title(400, 300, 'You have won.', 56, "rgba(0, 255, 0, 1.0)");
+				engine.graphics.front.draw_title(400, 325, 'I\'m sorry there is only 1 boring level, I ran out of time.', 18, "rgba(0, 255, 0, 1.0)");
 			}
 			else {
 				engine.graphics.front.draw_title(400, 300, 'You have lost.', 56, "rgba(255, 0, 0, 1.0)");
